@@ -1,4 +1,4 @@
 name = "XAM"
 uuid = "d759349c-bcba-11e9-07c2-5b90f8f05f7c"
-authors = ["Ciarán O'Mara <Ciaran.OMara@utas.edu.au>"]
+authors = ["Kenta Sato <bicycle1885@gmail.com>", "Ben J. Ward <ward9250@gmail.com>", "Ciarán O'Mara <Ciaran.OMara@utas.edu.au>"]
 version = "0.1.0"
