@@ -2,11 +2,11 @@
 # =========
 
 mutable struct Reader <: BioGenerics.IO.AbstractReader
-    state::BioGenerics.Ragel.State
+    state::State
     header::Header
 
     function Reader(input::BufferedStreams.BufferedInputStream)
-        reader = new(BioGenerics.Ragel.State(sam_header_machine.start_state, input), Header())
+        reader = new(State(sam_header_machine.start_state, input), Header())
         readheader!(reader)
         reader.state.cs = sam_body_machine.start_state
         return reader
