@@ -317,36 +317,39 @@ const sam_metainfo_actions = Dict(
     end,
     :anchor => :(),
     :mark1  => :(mark1 = p),
-    :mark2  => :(mark2 = p))
-eval(
-    generate_index_function(
-        MetaInfo,
-        sam_metainfo_machine,
-        :(mark1 = mark2 = offset = 0),
-        sam_metainfo_actions))
-eval(
-    generate_readheader_function(
-        Reader,
-        MetaInfo,
-        sam_header_machine,
-        :(mark1 = mark2 = offset = 0),
-        merge(sam_metainfo_actions, Dict(
-            :metainfo => quote
-                resize_and_copy!(record.data, data, upanchor!(stream):p-1)
-                record.filled = (offset+1:p-1) .- offset
-                @assert isfilled(record)
-                push!(reader.header.metainfo, record)
-                ensure_margin!(stream)
-                record = MetaInfo()
-            end,
-            :header => :(finish_header = true; @escape),
-            :countline => :(linenum += 1),
-            :anchor => :(anchor!(stream, p); offset = p - 1))),
-        quote
-            if !eof(stream)
-                stream.position -= 1  # cancel look-ahead
-            end
-        end))
+    :mark2  => :(mark2 = p)
+)
+
+generate_index_function(
+    MetaInfo,
+    sam_metainfo_machine,
+    :(mark1 = mark2 = offset = 0),
+    sam_metainfo_actions
+) |> eval
+
+generate_readheader_function(
+    Reader,
+    MetaInfo,
+    sam_header_machine,
+    :(mark1 = mark2 = offset = 0),
+    merge(sam_metainfo_actions, Dict(
+        :metainfo => quote
+            resize_and_copy!(record.data, data, upanchor!(stream):p-1)
+            record.filled = (offset+1:p-1) .- offset
+            @assert isfilled(record)
+            push!(reader.header.metainfo, record)
+            ensure_margin!(stream)
+            record = MetaInfo()
+        end,
+        :header => :(finish_header = true; @escape),
+        :countline => :(linenum += 1),
+        :anchor => :(anchor!(stream, p); offset = p - 1))),
+    quote
+        if !eof(stream)
+            stream.position -= 1  # cancel look-ahead
+        end
+    end
+) |> eval
 
 const sam_record_actions = Dict(
     :record_qname => :(record.qname = (mark:p-1) .- offset),
@@ -366,24 +369,28 @@ const sam_record_actions = Dict(
         record.filled = (offset+1:p-1) .- offset
     end,
     :anchor       => :(),
-    :mark         => :(mark = p))
-eval(
-    generate_index_function(
-        Record,
-        sam_record_machine,
-        :(mark = offset = 0),
-        sam_record_actions))
-eval(
-    generate_read_function(
-        Reader,
-        sam_body_machine,
-        :(mark = offset = 0),
-        merge(sam_record_actions, Dict(
-            :record    => quote
-                resize_and_copy!(record.data, data, upanchor!(stream):p-1)
-                record.filled = (offset+1:p-1) .- offset
-                found_record = true
-                @escape
-            end,
-            :countline => :(linenum += 1),
-            :anchor    => :(anchor!(stream, p); offset = p - 1)))))
+    :mark         => :(mark = p)
+)
+
+generate_index_function(
+    Record,
+    sam_record_machine,
+    :(mark = offset = 0),
+    sam_record_actions
+) |> eval
+
+generate_read_function(
+    Reader,
+    sam_body_machine,
+    :(mark = offset = 0),
+    merge(sam_record_actions, Dict(
+        :record    => quote
+            resize_and_copy!(record.data, data, upanchor!(stream):p-1)
+            record.filled = (offset+1:p-1) .- offset
+            found_record = true
+            @escape
+        end,
+        :countline => :(linenum += 1),
+        :anchor    => :(anchor!(stream, p); offset = p - 1))
+    )
+) |> eval
