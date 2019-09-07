@@ -173,8 +173,10 @@ end
 # file   = header . body
 # header = metainfo*
 # body   = record*
-isinteractive() && info("compiling SAM")
 const sam_metainfo_machine, sam_record_machine, sam_header_machine, sam_body_machine = (function ()
+
+    isinteractive() && info("compiling SAM")
+
     cat = Automa.RegExp.cat
     rep = Automa.RegExp.rep
     alt = Automa.RegExp.alt
