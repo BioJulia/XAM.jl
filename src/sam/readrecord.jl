@@ -185,79 +185,79 @@ const sam_metainfo_machine, sam_record_machine, sam_header_machine, sam_body_mac
 
     metainfo = let
         tag = re"[A-Z][A-Z]" \ cat("CO")
-        tag.actions[:enter] = [:mark1]
+        tag.actions[:enter] = [:pos1]
         tag.actions[:exit]  = [:metainfo_tag]
 
         dict = let
             key = re"[A-Za-z][A-Za-z0-9]"
-            key.actions[:enter] = [:mark2]
+            key.actions[:enter] = [:pos2]
             key.actions[:exit]  = [:metainfo_dict_key]
             val = re"[ -~]+"
-            val.actions[:enter] = [:mark2]
+            val.actions[:enter] = [:pos2]
             val.actions[:exit]  = [:metainfo_dict_val]
             keyval = cat(key, ':', val)
 
             cat(keyval, rep(cat('\t', keyval)))
         end
-        dict.actions[:enter] = [:mark1]
+        dict.actions[:enter] = [:pos1]
         dict.actions[:exit]  = [:metainfo_val]
 
         co = cat("CO")
-        co.actions[:enter] = [:mark1]
+        co.actions[:enter] = [:pos1]
         co.actions[:exit]  = [:metainfo_tag]
 
         comment = re"[^\r\n]*"
-        comment.actions[:enter] = [:mark1]
+        comment.actions[:enter] = [:pos1]
         comment.actions[:exit]  = [:metainfo_val]
 
         cat('@', alt(cat(tag, '\t', dict), cat(co, '\t', comment)))
     end
-    metainfo.actions[:enter] = [:anchor]
+    metainfo.actions[:enter] = [:mark]
     metainfo.actions[:exit]  = [:metainfo]
 
     record = let
         qname = re"[!-?A-~]+"
-        qname.actions[:enter] = [:mark]
+        qname.actions[:enter] = [:pos]
         qname.actions[:exit]  = [:record_qname]
 
         flag = re"[0-9]+"
-        flag.actions[:enter] = [:mark]
+        flag.actions[:enter] = [:pos]
         flag.actions[:exit]  = [:record_flag]
 
         rname = re"\*|[!-()+-<>-~][!-~]*"
-        rname.actions[:enter] = [:mark]
+        rname.actions[:enter] = [:pos]
         rname.actions[:exit]  = [:record_rname]
 
         pos = re"[0-9]+"
-        pos.actions[:enter] = [:mark]
+        pos.actions[:enter] = [:pos]
         pos.actions[:exit]  = [:record_pos]
 
         mapq = re"[0-9]+"
-        mapq.actions[:enter] = [:mark]
+        mapq.actions[:enter] = [:pos]
         mapq.actions[:exit]  = [:record_mapq]
 
         cigar = re"\*|([0-9]+[MIDNSHPX=])+"
-        cigar.actions[:enter] = [:mark]
+        cigar.actions[:enter] = [:pos]
         cigar.actions[:exit]  = [:record_cigar]
 
         rnext = re"\*|=|[!-()+-<>-~][!-~]*"
-        rnext.actions[:enter] = [:mark]
+        rnext.actions[:enter] = [:pos]
         rnext.actions[:exit]  = [:record_rnext]
 
         pnext = re"[0-9]+"
-        pnext.actions[:enter] = [:mark]
+        pnext.actions[:enter] = [:pos]
         pnext.actions[:exit]  = [:record_pnext]
 
         tlen = re"[-+]?[0-9]+"
-        tlen.actions[:enter] = [:mark]
+        tlen.actions[:enter] = [:pos]
         tlen.actions[:exit]  = [:record_tlen]
 
         seq = re"\*|[A-Za-z=.]+"
-        seq.actions[:enter] = [:mark]
+        seq.actions[:enter] = [:pos]
         seq.actions[:exit]  = [:record_seq]
 
         qual = re"[!-~]+"
-        qual.actions[:enter] = [:mark]
+        qual.actions[:enter] = [:pos]
         qual.actions[:exit]  = [:record_qual]
 
         field = let
@@ -272,7 +272,7 @@ const sam_metainfo_machine, sam_record_machine, sam_header_machine, sam_body_mac
 
             cat(tag, ':', val)
         end
-        field.actions[:enter] = [:mark]
+        field.actions[:enter] = [:pos]
         field.actions[:exit]  = [:record_field]
 
         cat(
@@ -289,7 +289,7 @@ const sam_metainfo_machine, sam_record_machine, sam_header_machine, sam_body_mac
             qual,
             rep(cat('\t', field)))
     end
-    record.actions[:enter] = [:anchor]
+    record.actions[:enter] = [:mark]
     record.actions[:exit]  = [:record]
 
     newline = let
@@ -309,23 +309,23 @@ const sam_metainfo_machine, sam_record_machine, sam_header_machine, sam_body_mac
 end)()
 
 const sam_metainfo_actions = Dict(
-    :metainfo_tag => :(record.tag = (mark1:p-1) .- offset),
-    :metainfo_val => :(record.val = (mark1:p-1) .- offset),
-    :metainfo_dict_key => :(push!(record.dictkey, (mark2:p-1) .- offset)),
-    :metainfo_dict_val => :(push!(record.dictval, (mark2:p-1) .- offset)),
+    :metainfo_tag => :(record.tag = (pos1:p-1) .- offset),
+    :metainfo_val => :(record.val = (pos1:p-1) .- offset),
+    :metainfo_dict_key => :(push!(record.dictkey, (pos2:p-1) .- offset)),
+    :metainfo_dict_val => :(push!(record.dictval, (pos2:p-1) .- offset)),
     :metainfo => quote
         resize_and_copy!(record.data, data, offset+1:p-1)
         record.filled = (offset+1:p-1) .- offset
     end,
-    :anchor => :(),
-    :mark1  => :(mark1 = p),
-    :mark2  => :(mark2 = p)
+    :mark => :(),
+    :pos1  => :(pos1 = p),
+    :pos2  => :(pos2 = p)
 )
 
 generate_index_function(
     MetaInfo,
     sam_metainfo_machine,
-    :(mark1 = mark2 = offset = 0),
+    :(pos1 = pos2 = offset = 0),
     sam_metainfo_actions
 ) |> eval
 
@@ -333,7 +333,7 @@ generate_readheader_function(
     Reader,
     MetaInfo,
     sam_header_machine,
-    :(mark1 = mark2 = offset = 0),
+    :(pos1 = pos2 = offset = 0),
     merge(sam_metainfo_actions, Dict(
         :metainfo => quote
             resize_and_copy!(record.data, data, upanchor!(stream):p-1)
@@ -345,7 +345,7 @@ generate_readheader_function(
         end,
         :header => :(finish_header = true; @escape),
         :countline => :(linenum += 1),
-        :anchor => :(anchor!(stream, p); offset = p - 1))),
+        :mark => :(anchor!(stream, p); offset = p - 1))),
     quote
         if !eof(stream)
             stream.position -= 1  # cancel look-ahead
@@ -354,37 +354,37 @@ generate_readheader_function(
 ) |> eval
 
 const sam_record_actions = Dict(
-    :record_qname => :(record.qname = (mark:p-1) .- offset),
-    :record_flag  => :(record.flag  = (mark:p-1) .- offset),
-    :record_rname => :(record.rname = (mark:p-1) .- offset),
-    :record_pos   => :(record.pos   = (mark:p-1) .- offset),
-    :record_mapq  => :(record.mapq  = (mark:p-1) .- offset),
-    :record_cigar => :(record.cigar = (mark:p-1) .- offset),
-    :record_rnext => :(record.rnext = (mark:p-1) .- offset),
-    :record_pnext => :(record.pnext = (mark:p-1) .- offset),
-    :record_tlen  => :(record.tlen  = (mark:p-1) .- offset),
-    :record_seq   => :(record.seq   = (mark:p-1) .- offset),
-    :record_qual  => :(record.qual  = (mark:p-1) .- offset),
-    :record_field => :(push!(record.fields, (mark:p-1) .- offset)),
+    :record_qname => :(record.qname = (pos:p-1) .- offset),
+    :record_flag  => :(record.flag  = (pos:p-1) .- offset),
+    :record_rname => :(record.rname = (pos:p-1) .- offset),
+    :record_pos   => :(record.pos   = (pos:p-1) .- offset),
+    :record_mapq  => :(record.mapq  = (pos:p-1) .- offset),
+    :record_cigar => :(record.cigar = (pos:p-1) .- offset),
+    :record_rnext => :(record.rnext = (pos:p-1) .- offset),
+    :record_pnext => :(record.pnext = (pos:p-1) .- offset),
+    :record_tlen  => :(record.tlen  = (pos:p-1) .- offset),
+    :record_seq   => :(record.seq   = (pos:p-1) .- offset),
+    :record_qual  => :(record.qual  = (pos:p-1) .- offset),
+    :record_field => :(push!(record.fields, (pos:p-1) .- offset)),
     :record       => quote
         resize_and_copy!(record.data, data, 1:p-1)
         record.filled = (offset+1:p-1) .- offset
     end,
-    :anchor       => :(),
-    :mark         => :(mark = p)
+    :mark       => :(),
+    :pos         => :(pos = p)
 )
 
 generate_index_function(
     Record,
     sam_record_machine,
-    :(mark = offset = 0),
+    :(pos = offset = 0),
     sam_record_actions
 ) |> eval
 
 generate_read_function(
     Reader,
     sam_body_machine,
-    :(mark = offset = 0),
+    :(pos = offset = 0),
     merge(sam_record_actions, Dict(
         :record    => quote
             resize_and_copy!(record.data, data, upanchor!(stream):p-1)
@@ -393,6 +393,6 @@ generate_read_function(
             @escape
         end,
         :countline => :(linenum += 1),
-        :anchor    => :(anchor!(stream, p); offset = p - 1))
+        :mark    => :(anchor!(stream, p); offset = p - 1))
     )
 ) |> eval
