@@ -1,5 +1,10 @@
 module XAM
 
-greet() = print("Hello World!")
+export
+    BAM,
+    SAM
+
+include("sam/sam.jl")
+include("bam/bam.jl")
 
 end # module
