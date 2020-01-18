@@ -90,6 +90,7 @@ function init_bam_reader(input::BGZFStreams.BGZFStream)
     A = read(input, UInt8)
     M = read(input, UInt8)
     x = read(input, UInt8)
+    
     if B != UInt8('B') || A != UInt8('A') || M != UInt8('M') || x != 0x01
         error("input was not a valid BAM file")
     end
@@ -114,6 +115,7 @@ function init_bam_reader(input::BGZFStreams.BGZFStream)
     voffset = isa(input.io, Base.AbstractPipe) ?
         BGZFStreams.VirtualOffset(0, 0) :
         BGZFStreams.virtualoffset(input)
+
     return Reader(
         input,
         samreader.header,
