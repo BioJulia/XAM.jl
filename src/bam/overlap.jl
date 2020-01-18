@@ -82,14 +82,18 @@ end
 
 function compare_intervals(record::Record, interval::Tuple{Int,UnitRange{Int}})
     rid = refid(record)
+
     if rid < interval[1] || (rid == interval[1] && rightposition(record) < first(interval[2]))
         # strictly left
         return -1
-    elseif rid > interval[1] || (rid == interval[1] && position(record) > last(interval[2]))
+    end
+
+    if rid > interval[1] || (rid == interval[1] && position(record) > last(interval[2]))
         # strictly right
         return +1
-    else
-        # overlapping
-        return 0
     end
+
+    # overlapping
+    return 0
+
 end
