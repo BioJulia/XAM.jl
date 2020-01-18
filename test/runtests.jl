@@ -1,12 +1,13 @@
 using Test
-using BioAlignments
-using BioSymbols
+using XAM
+import BioAlignments: Alignment, AlignmentAnchor, OP_START, OP_MATCH, OP_DELETE, header
 import BGZFStreams: BGZFStream
 import BioCore.Exceptions: MissingFieldException
 import BioCore.Testing.get_bio_fmt_specimens
 import BioSequences: @dna_str, @aa_str
 import GenomicFeatures
 import YAML
+
 
 # Generate a random range within `range`.
 function randrange(range)
@@ -68,12 +69,12 @@ end
         record = SAM.Record()
         @test !isfilled(record)
         @test !SAM.ismapped(record)
-        @test repr(record) == "BioAlignments.SAM.Record: <not filled>"
+        @test repr(record) == "XAM.SAM.Record: <not filled>"
         @test_throws ArgumentError SAM.flag(record)
 
         record = SAM.Record("r001\t99\tchr1\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*")
         @test isfilled(record)
-        @test occursin(r"^BioAlignments.SAM.Record:\n", repr(record))
+        @test occursin(r"^XAM.SAM.Record:\n", repr(record))
         @test SAM.ismapped(record)
         @test SAM.isprimary(record)
         @test SAM.hastempname(record)
@@ -217,7 +218,7 @@ end
     @testset "Record" begin
         record = BAM.Record()
         @test !isfilled(record)
-        @test repr(record) == "BioAlignments.BAM.Record: <not filled>"
+        @test repr(record) == "XAM.BAM.Record: <not filled>"
         @test_throws ArgumentError BAM.flag(record)
     end
 
@@ -225,7 +226,7 @@ end
         reader = open(BAM.Reader, joinpath(bamdir, "ce#1.bam"))
         @test isa(reader, BAM.Reader)
         @test eltype(reader) === BAM.Record
-        @test startswith(repr(reader), "BioAlignments.BAM.Reader{IOStream}:")
+        @test startswith(repr(reader), "XAM.BAM.Reader{IOStream}:")
 
         # header
         h = header(reader)

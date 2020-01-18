@@ -34,13 +34,10 @@ end
 
 Get the header of `reader`.
 """
-function header(reader::Reader)::Header
+function BioCore.header(reader::Reader)::Header
     return reader.header
 end
 
-function BioCore.header(reader::Reader)
-    return header(reader)
-end
 
 function Base.eltype(::Type{Reader})
     return Record

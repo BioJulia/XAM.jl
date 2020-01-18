@@ -52,7 +52,7 @@ Get the header of `reader`.
 
 If `fillSQ` is `true`, this function fills missing "SQ" metainfo in the header.
 """
-function header(reader::Reader; fillSQ::Bool=false)::SAM.Header
+function BioCore.header(reader::Reader; fillSQ::Bool=false)::SAM.Header
     header = reader.header
     if fillSQ
         if !isempty(findall(reader.header, "SQ"))
@@ -66,9 +66,6 @@ function header(reader::Reader; fillSQ::Bool=false)::SAM.Header
     return header
 end
 
-function BioCore.header(reader::Reader)
-    return header(reader)
-end
 
 function Base.seek(reader::Reader, voffset::BGZFStreams.VirtualOffset)
     seek(reader.stream, voffset)
