@@ -1,4 +1,4 @@
-# XAM.jl
+# XAM
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Latest Release](https://img.shields.io/github/release/BioJulia/XAM.jl.svg)](https://github.com/BioJulia/XAM.jl/releases/latest)
@@ -7,10 +7,14 @@
 [![Latest documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://biojulia.github.io/XAM.jl/dev/)
 [![Join the chat at https://gitter.im/BioJulia/XAM.jl](https://badges.gitter.im/BioJulia/XAM.jl.svg)](https://gitter.im/BioJulia/XAM.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+
 ## Description
+
 XAM provides I/O and utilities for manipulating SAM and BAM formatted alignment map files.
 
+
 ## Installation
+
 XAM is made available to install through BioJulia's package registry.
 
 Julia by default only watches the "General" package registry, so before you start, you should add the BioJulia package registry.
@@ -30,14 +34,15 @@ add XAM
 
 If you are interested in the cutting edge of the development, please check out the [develop branch](https://github.com/BioJulia/XAM.jl/tree/develop) to try new features before release.
 
+
 ## Testing
 
 XAM is tested against Julia `1.X` on Linux, OS X, and Windows.
 
 **Latest build status:**
 
-[![Build Status](https://travis-ci.org/BioJulia/XAM.jl.svg?branch=master)](https://travis-ci.org/BioJulia/XAM.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/jny2ep4u3cmly8pj/branch/master?svg=true)](https://ci.appveyor.com/project/BioJulia/XAM-jl/branch/master)
+[![](https://travis-ci.com/BioJulia/XAM.jl.svg?branch=master)](https://travis-ci.com/BioJulia/XAM.jl)
+[![Build status](https://ci.appveyor.com/api/projects/status/y2u4o589q38s6f34?svg=true)](https://ci.appveyor.com/project/BioJulia/xam-jl)
 [![codecov](https://codecov.io/gh/BioJulia/XAM.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/BioJulia/XAM.jl)
 
 ## Contributing
@@ -49,8 +54,9 @@ Take a look at the [contributing files](https://github.com/BioJulia/Contributing
 
 ### Financial contributions
 
-We also welcome financial contributions in full transparency on our [open collective](https://opencollective.com/biojulia).
-Anyone can file an expense. If the expense makes sense for the development the core contributors and the person who filed the expense will be reimbursed.
+We also welcome financial contributions in full transparency on our
+[open collective](https://opencollective.com/biojulia).
+Anyone can file an expense. If the expense makes sense for the development of the community, it will be "merged" in the ledger of our open collective by the core contributors and the person who filed the expense will be reimbursed.
 
 
 ## Backers & Sponsors
