@@ -612,9 +612,10 @@ end
 function data_size(record::Record)
     if isfilled(record)
         return record.block_size - FIXED_FIELDS_BYTES + sizeof(record.block_size)
-    else
-        return 0
     end
+
+    return 0
+
 end
 
 function checkfilled(record::Record)

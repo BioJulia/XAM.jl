@@ -299,9 +299,10 @@ Get the alignment of `record`.
 function alignment(record::Record)::BioAlignments.Alignment
     if ismapped(record)
         return BioAlignments.Alignment(cigar(record), 1, position(record))
-    else
-        return BioAlignments.Alignment(BioAlignments.AlignmentAnchor[])
     end
+
+    return BioAlignments.Alignment(BioAlignments.AlignmentAnchor[])
+
 end
 
 function hasalignment(record::Record)
@@ -474,23 +475,30 @@ function Base.getindex(record::Record, tag::AbstractString)
     else
         hi = first(record.fields[i+1]) - 2
     end
+
     if typ == UInt8('A')
         @assert lo == hi
         return Char(record.data[lo])
-    elseif typ == UInt8('i')
+    end
+    if typ == UInt8('i')
         return unsafe_parse_decimal(Int, record.data, lo:hi)
-    elseif typ == UInt8('f')
+    end
+    if typ == UInt8('f')
         # TODO: Call a C function directly for speed?
         return parse(Float32, SubString(record.data[lo:hi]))
-    elseif typ == UInt8('Z')
-        return String(record.data[lo:hi])
-    elseif typ == UInt8('H')
-        return parse_hexarray(record.data, lo:hi)
-    elseif typ == UInt8('B')
-        return parse_typedarray(record.data, lo:hi)
-    else
-        throw(ArgumentError("type code '$(Char(typ))' is not defined"))
     end
+    if typ == UInt8('Z')
+        return String(record.data[lo:hi])
+    end
+    if typ == UInt8('H')
+        return parse_hexarray(record.data, lo:hi)
+    end
+    if typ == UInt8('B')
+        return parse_typedarray(record.data, lo:hi)
+    end
+
+    throw(ArgumentError("type code '$(Char(typ))' is not defined"))
+
 end
 
 function Base.keys(record::Record)
@@ -602,21 +610,28 @@ function parse_typedarray(data::Vector{UInt8}, range::UnitRange{Int})
     xs = split(String(data[first(range)+2:last(range)]))
     if t == UInt8('c')
         return [parse(Int8, x) for x in xs]
-    elseif t == UInt8('C')
-        return [parse(UInt8, x) for x in xs]
-    elseif t == UInt8('s')
-        return [parse(Int16, x) for x in xs]
-    elseif t == UInt8('S')
-        return [parse(UInt16, x) for x in xs]
-    elseif t == UInt8('i')
-        return [parse(Int32, x) for x in xs]
-    elseif t == UInt8('I')
-        return [parse(UInt32, x) for x in xs]
-    elseif t == UInt8('f')
-        return [parse(Float32, x) for x in xs]
-    else
-        throw(ArgumentError("type code '$(Char(t))' is not defined"))
     end
+    if t == UInt8('C')
+        return [parse(UInt8, x) for x in xs]
+    end
+    if t == UInt8('s')
+        return [parse(Int16, x) for x in xs]
+    end
+    if t == UInt8('S')
+        return [parse(UInt16, x) for x in xs]
+    end
+    if t == UInt8('i')
+        return [parse(Int32, x) for x in xs]
+    end
+    if t == UInt8('I')
+        return [parse(UInt32, x) for x in xs]
+    end
+    if t == UInt8('f')
+        return [parse(Float32, x) for x in xs]
+    end
+
+    throw(ArgumentError("type code '$(Char(t))' is not defined"))
+
 end
 
 function ismissing(record::Record, range::UnitRange{Int})
