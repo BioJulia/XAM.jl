@@ -18,7 +18,7 @@ Automa = "0.7, 0.8"
 BGZFStreams = "0.3"
 BioAlignments = "1"
 BioCore = "2"
-BioSequences = "1"
+BioSequences = "1, 2.0"
 BufferedStreams = "1"
 GenomicFeatures = "1"
 
