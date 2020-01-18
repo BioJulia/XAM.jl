@@ -2,3 +2,29 @@ name = "XAM"
 uuid = "d759349c-bcba-11e9-07c2-5b90f8f05f7c"
 authors = ["Kenta Sato <bicycle1885@gmail.com>", "Ben J. Ward <ward9250@gmail.com>", "Ciarán O'Mara <Ciaran.OMara@utas.edu.au>"]
 version = "0.1.0"
+
+[deps]
+Automa = "67c07d97-cdcb-5c2c-af73-a7f9c32a568b"
+BGZFStreams = "28d598bf-9b8f-59f1-b38c-5a06b4a0f5e6"
+BioAlignments = "00701ae9-d1dc-5365-b64a-a3a3ebf5695e"
+BioCore = "37cfa864-2cd6-5c12-ad9e-b6597d696c81"
+BioSequences = "7e6ae17a-c86d-528c-b3b9-7f778a29fe59"
+BufferedStreams = "e1450e63-4bb3-523b-b2a4-4ffa8c0fd77d"
+GenomicFeatures = "899a7d2d-5c61-547b-bef9-6698a8d05446"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[compat]
+Automa = "0.7, 0.8"
+BGZFStreams = "0.3"
+BioAlignments = "1"
+BioCore = "2"
+BioSequences = "1"
+BufferedStreams = "1"
+GenomicFeatures = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+
+[targets]
+test = ["Test", "YAML"]

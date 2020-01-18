@@ -4,10 +4,11 @@
 module BAM
 
 import BGZFStreams
-import BioAlignments: BioAlignments, SAM
+import BioAlignments
+import XAM: XAM, SAM
 import GenomicFeatures: GenomicFeatures, Interval
 import BioSequences
-import BioCore: BioCore, isfilled
+import BioCore: BioCore, isfilled, header
 
 include("bai.jl")
 include("auxdata.jl")
