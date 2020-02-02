@@ -67,7 +67,8 @@ function Base.iterate(iter::OverlapIterator, state)
             c = compare_intervals(state.record, (state.refindex, iter.interval))
             if c == 0
                 return copy(state.record), state
-            elseif c > 0
+            end
+            if c > 0
                 # no more overlapping records in this chunk since records are sorted
                 break
             end

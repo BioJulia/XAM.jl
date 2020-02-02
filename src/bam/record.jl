@@ -163,7 +163,8 @@ function checked_refid(record::Record)
     id = refid(record)
     if id == 0
         throw(ArgumentError("record is not mapped"))
-    elseif !isdefined(record, :reader)
+    end
+    if !isdefined(record, :reader)
         throw(ArgumentError("reader is not defined"))
     end
     return id

@@ -30,10 +30,8 @@ end
 function Reader(input::IO; index=nothing)
     if isa(index, AbstractString)
         index = BAI(index)
-    else
-        if index != nothing
-            error("unrecognizable index argument")
-        end
+    elseif index != nothing
+        error("unrecognizable index argument")
     end
     reader = init_bam_reader(input)
     reader.index = index
