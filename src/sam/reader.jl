@@ -1,6 +1,175 @@
 # SAM Reader
 # =========
 
+@inline function anchor!(stream::BufferedStreams.BufferedInputStream, p, immobilize = true)
+    stream.anchor = p
+    stream.immobilized = immobilize
+    return stream
+end
+
+@inline function upanchor!(stream::BufferedStreams.BufferedInputStream)
+    @assert stream.anchor != 0 "upanchor! called with no anchor set"
+    anchor = stream.anchor
+    stream.anchor = 0
+    stream.immobilized = false
+    return anchor
+end
+
+function ensure_margin!(stream::BufferedStreams.BufferedInputStream)
+    if stream.position * 20 > length(stream.buffer) * 19
+        BufferedStreams.shiftdata!(stream)
+    end
+    return nothing
+end
+
+@inline function resize_and_copy!(dst::Vector{UInt8}, src::Vector{UInt8}, r::UnitRange{Int})
+    return resize_and_copy!(dst, 1, src, r)
+end
+
+@inline function resize_and_copy!(dst::Vector{UInt8}, dstart::Int, src::Vector{UInt8}, r::UnitRange{Int})
+    rlen = length(r)
+    if length(dst) != dstart + rlen - 1
+        resize!(dst, dstart + rlen - 1)
+    end
+    copyto!(dst, dstart, src, first(r), rlen)
+    return dst
+end
+
+function generate_index_function(record_type, machine, init_code, actions; kwargs...)
+    kwargs = Dict(kwargs)
+    context = Automa.CodeGenContext(
+        generator = get(kwargs, :generator, :goto),
+        checkbounds = get(kwargs, :checkbounds, false),
+        loopunroll = get(kwargs, :loopunroll, 0)
+    )
+    quote
+        function index!(record::$(record_type))
+            data = record.data
+            p = 1
+            p_end = p_eof = sizeof(data)
+            initialize!(record)
+            $(init_code)
+            cs = $(machine.start_state)
+            $(Automa.generate_exec_code(context, machine, actions))
+            if cs != 0
+                throw(ArgumentError(string("failed to index ", $(record_type), " ~>", repr(String(data[p:min(p+7,p_end)])))))
+            end
+            @assert isfilled(record)
+            return record
+        end
+    end
+end
+
+function generate_readheader_function(reader_type, metainfo_type, machine, init_code, actions, finish_code=:())
+    quote
+        function readheader!(reader::$(reader_type))
+            _readheader!(reader, reader.state)
+        end
+
+        function _readheader!(reader::$(reader_type), state::State)
+            stream = state.stream
+            ensure_margin!(stream)
+            cs = state.cs
+            linenum = state.linenum
+            data = stream.buffer
+            p = stream.position
+            p_end = stream.available
+            p_eof = -1
+            finish_header = false
+            record = $(metainfo_type)()
+
+            $(init_code)
+
+            while true
+                $(Automa.generate_exec_code(Automa.CodeGenContext(generator=:table), machine, actions))
+
+                state.cs = cs
+                state.finished = cs == 0
+                state.linenum = linenum
+                stream.position = p
+
+                if cs < 0
+                    error("$($(reader_type)) file format error on line ", linenum)
+                elseif finish_header
+                    $(finish_code)
+                    break
+                elseif p > p_eof ≥ 0
+                    error("incomplete $($(reader_type)) input on line ", linenum)
+                else
+                    hits_eof = BufferedStreams.fillbuffer!(stream) == 0
+                    p = stream.position
+                    p_end = stream.available
+                    if hits_eof
+                        p_eof = p_end
+                    end
+                end
+            end
+        end
+    end
+end
+
+function generate_read_function(reader_type, machine, init_code, actions; kwargs...)
+    kwargs = Dict(kwargs)
+    context = Automa.CodeGenContext(
+        generator=get(kwargs, :generator, :goto),
+        checkbounds=get(kwargs, :checkbounds, false),
+        loopunroll=get(kwargs, :loopunroll, 0)
+    )
+    quote
+        function Base.read!(reader::$(reader_type), record::eltype($(reader_type)))::eltype($(reader_type))
+            return _read!(reader, reader.state, record)
+        end
+
+        function _read!(reader::$(reader_type), state::State, record::eltype($(reader_type)))
+            stream = state.stream
+            ensure_margin!(stream)
+            cs = state.cs
+            linenum = state.linenum
+            data = stream.buffer
+            p = stream.position
+            p_end = stream.available
+            p_eof = -1
+            found_record = false
+            initialize!(record)
+
+            $(init_code)
+
+            if state.finished
+                throw(EOFError())
+            end
+
+            while true
+                $(Automa.generate_exec_code(context, machine, actions))
+
+                state.cs = cs
+                state.finished |= cs == 0
+                state.linenum = linenum
+                stream.position = p
+
+                if cs < 0
+                    error($(reader_type), " file format error on line ", linenum, " ~>", repr(String(data[p:min(p+7,p_end)])))
+                elseif found_record
+                    break
+                elseif cs == 0
+                    throw(EOFError())
+                elseif p > p_eof ≥ 0
+                    error("incomplete $($(reader_type)) input on line ", linenum)
+                elseif BufferedStreams.available_bytes(stream) < 64
+                    hits_eof = BufferedStreams.fillbuffer!(stream) == 0
+                    p = stream.position
+                    p_end = stream.available
+                    if hits_eof
+                        p_eof = p_end
+                    end
+                end
+            end
+
+            @assert isfilled(record)
+            return record
+        end
+    end
+end
+
 mutable struct Reader <: BioGenerics.IO.AbstractReader
     state::State
     header::Header
@@ -184,36 +353,36 @@ const sam_metainfo_actions = Dict(
     :metainfo_dict_key => :(push!(record.dictkey, (mark2:p-1) .- offset)),
     :metainfo_dict_val => :(push!(record.dictval, (mark2:p-1) .- offset)),
     :metainfo => quote
-        BioGenerics.ReaderHelper.resize_and_copy!(record.data, data, offset+1:p-1)
+        resize_and_copy!(record.data, data, offset+1:p-1)
         record.filled = (offset+1:p-1) .- offset
     end,
     :anchor => :(),
     :mark1  => :(mark1 = p),
     :mark2  => :(mark2 = p))
 eval(
-    BioGenerics.ReaderHelper.generate_index_function(
+    generate_index_function(
         MetaInfo,
         sam_metainfo_machine,
         :(mark1 = mark2 = offset = 0),
         sam_metainfo_actions))
 eval(
-    BioGenerics.ReaderHelper.generate_readheader_function(
+    generate_readheader_function(
         Reader,
         MetaInfo,
         sam_header_machine,
         :(mark1 = mark2 = offset = 0),
         merge(sam_metainfo_actions, Dict(
             :metainfo => quote
-                BioGenerics.ReaderHelper.resize_and_copy!(record.data, data, BioGenerics.ReaderHelper.upanchor!(stream):p-1)
+                resize_and_copy!(record.data, data, upanchor!(stream):p-1)
                 record.filled = (offset+1:p-1) .- offset
                 @assert isfilled(record)
                 push!(reader.header.metainfo, record)
-                BioGenerics.ReaderHelper.ensure_margin!(stream)
+                ensure_margin!(stream)
                 record = MetaInfo()
             end,
             :header => :(finish_header = true; @escape),
             :countline => :(linenum += 1),
-            :anchor => :(BioGenerics.ReaderHelper.anchor!(stream, p); offset = p - 1))),
+            :anchor => :(anchor!(stream, p); offset = p - 1))),
         quote
             if !eof(stream)
                 stream.position -= 1  # cancel look-ahead
@@ -234,28 +403,28 @@ const sam_record_actions = Dict(
     :record_qual  => :(record.qual  = (mark:p-1) .- offset),
     :record_field => :(push!(record.fields, (mark:p-1) .- offset)),
     :record       => quote
-        BioGenerics.ReaderHelper.resize_and_copy!(record.data, data, 1:p-1)
+        resize_and_copy!(record.data, data, 1:p-1)
         record.filled = (offset+1:p-1) .- offset
     end,
     :anchor       => :(),
     :mark         => :(mark = p))
 eval(
-    BioGenerics.ReaderHelper.generate_index_function(
+    generate_index_function(
         Record,
         sam_record_machine,
         :(mark = offset = 0),
         sam_record_actions))
 eval(
-    BioGenerics.ReaderHelper.generate_read_function(
+    generate_read_function(
         Reader,
         sam_body_machine,
         :(mark = offset = 0),
         merge(sam_record_actions, Dict(
             :record    => quote
-                BioGenerics.ReaderHelper.resize_and_copy!(record.data, data, BioGenerics.ReaderHelper.upanchor!(stream):p-1)
+                resize_and_copy!(record.data, data, upanchor!(stream):p-1)
                 record.filled = (offset+1:p-1) .- offset
                 found_record = true
                 @escape
             end,
             :countline => :(linenum += 1),
-            :anchor    => :(BioGenerics.ReaderHelper.anchor!(stream, p); offset = p - 1)))))
+            :anchor    => :(anchor!(stream, p); offset = p - 1)))))
