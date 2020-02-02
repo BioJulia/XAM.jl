@@ -87,7 +87,7 @@ function init_bam_reader(input::BGZFStreams.BGZFStream)
     A = read(input, UInt8)
     M = read(input, UInt8)
     x = read(input, UInt8)
-    
+
     if B != UInt8('B') || A != UInt8('A') || M != UInt8('M') || x != 0x01
         error("input was not a valid BAM file")
     end
@@ -97,16 +97,16 @@ function init_bam_reader(input::BGZFStreams.BGZFStream)
     samreader = SAM.Reader(IOBuffer(read(input, textlen)))
 
     # reference sequences
-    refseqnames = String[]
-    refseqlens = Int[]
     n_refs = read(input, Int32)
-    for _ in 1:n_refs
+    refseqnames = Vector{String}(undef, n_refs)
+    refseqlens = Vector{Int}(undef, n_refs)
+    @inbounds for i in 1:n_refs
         namelen = read(input, Int32)
         data = read(input, namelen)
         seqname = unsafe_string(pointer(data))
         seqlen = read(input, Int32)
-        push!(refseqnames, seqname)
-        push!(refseqlens, seqlen)
+        refseqnames[i] = seqname
+        refseqlens[i] = seqlen
     end
 
     voffset = isa(input.io, Base.AbstractPipe) ?
