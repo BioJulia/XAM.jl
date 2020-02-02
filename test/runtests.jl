@@ -1,24 +1,15 @@
 using Test
+
+using BioGenerics
+using FormatSpecimens
 using GenomicFeatures
 using XAM
+
 import BioAlignments: Alignment, AlignmentAnchor, OP_START, OP_MATCH, OP_DELETE
-using FormatSpecimens
 import BGZFStreams: BGZFStream
-import BioCore.Exceptions: MissingFieldException
+import BioGenerics.Exceptions: MissingFieldException
 import BioSequences: @dna_str, @aa_str
 
-
-import BioCore:
-    header,
-    isfilled,
-    seqname,
-    hasseqname,
-    sequence,
-    hassequence,
-    leftposition,
-    rightposition,
-    hasleftposition,
-    hasrightposition
 
 # Generate a random range within `range`.
 function randrange(range)

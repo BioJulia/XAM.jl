@@ -3,14 +3,14 @@
 
 module SAM
 
-using BioCore
+using BioGenerics
 
 import Automa
 import Automa.RegExp: @re_str
 import BioAlignments
-import BioCore.Exceptions: missingerror
-import BioCore.RecordHelper: unsafe_parse_decimal
-import BioCore: isfilled, header
+import BioGenerics.Exceptions: missingerror
+import BioGenerics.RecordHelper: unsafe_parse_decimal
+import BioGenerics: isfilled, header
 import BioSequences
 import BufferedStreams
 using Printf: @sprintf

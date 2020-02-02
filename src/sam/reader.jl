@@ -1,12 +1,12 @@
 # SAM Reader
 # =========
 
-mutable struct Reader <: BioCore.IO.AbstractReader
-    state::BioCore.Ragel.State
+mutable struct Reader <: BioGenerics.IO.AbstractReader
+    state::BioGenerics.Ragel.State
     header::Header
 
     function Reader(input::BufferedStreams.BufferedInputStream)
-        reader = new(BioCore.Ragel.State(sam_header_machine.start_state, input), Header())
+        reader = new(BioGenerics.Ragel.State(sam_header_machine.start_state, input), Header())
         readheader!(reader)
         reader.state.cs = sam_body_machine.start_state
         return reader
@@ -25,7 +25,7 @@ function Reader(input::IO)
     return Reader(BufferedStreams.BufferedInputStream(input))
 end
 
-function BioCore.IO.stream(reader::Reader)
+function BioGenerics.IO.stream(reader::Reader)
     return reader.state.stream
 end
 
@@ -184,36 +184,36 @@ const sam_metainfo_actions = Dict(
     :metainfo_dict_key => :(push!(record.dictkey, (mark2:p-1) .- offset)),
     :metainfo_dict_val => :(push!(record.dictval, (mark2:p-1) .- offset)),
     :metainfo => quote
-        BioCore.ReaderHelper.resize_and_copy!(record.data, data, offset+1:p-1)
+        BioGenerics.ReaderHelper.resize_and_copy!(record.data, data, offset+1:p-1)
         record.filled = (offset+1:p-1) .- offset
     end,
     :anchor => :(),
     :mark1  => :(mark1 = p),
     :mark2  => :(mark2 = p))
 eval(
-    BioCore.ReaderHelper.generate_index_function(
+    BioGenerics.ReaderHelper.generate_index_function(
         MetaInfo,
         sam_metainfo_machine,
         :(mark1 = mark2 = offset = 0),
         sam_metainfo_actions))
 eval(
-    BioCore.ReaderHelper.generate_readheader_function(
+    BioGenerics.ReaderHelper.generate_readheader_function(
         Reader,
         MetaInfo,
         sam_header_machine,
         :(mark1 = mark2 = offset = 0),
         merge(sam_metainfo_actions, Dict(
             :metainfo => quote
-                BioCore.ReaderHelper.resize_and_copy!(record.data, data, BioCore.ReaderHelper.upanchor!(stream):p-1)
+                BioGenerics.ReaderHelper.resize_and_copy!(record.data, data, BioGenerics.ReaderHelper.upanchor!(stream):p-1)
                 record.filled = (offset+1:p-1) .- offset
                 @assert isfilled(record)
                 push!(reader.header.metainfo, record)
-                BioCore.ReaderHelper.ensure_margin!(stream)
+                BioGenerics.ReaderHelper.ensure_margin!(stream)
                 record = MetaInfo()
             end,
             :header => :(finish_header = true; @escape),
             :countline => :(linenum += 1),
-            :anchor => :(BioCore.ReaderHelper.anchor!(stream, p); offset = p - 1))),
+            :anchor => :(BioGenerics.ReaderHelper.anchor!(stream, p); offset = p - 1))),
         quote
             if !eof(stream)
                 stream.position -= 1  # cancel look-ahead
@@ -234,28 +234,28 @@ const sam_record_actions = Dict(
     :record_qual  => :(record.qual  = (mark:p-1) .- offset),
     :record_field => :(push!(record.fields, (mark:p-1) .- offset)),
     :record       => quote
-        BioCore.ReaderHelper.resize_and_copy!(record.data, data, 1:p-1)
+        BioGenerics.ReaderHelper.resize_and_copy!(record.data, data, 1:p-1)
         record.filled = (offset+1:p-1) .- offset
     end,
     :anchor       => :(),
     :mark         => :(mark = p))
 eval(
-    BioCore.ReaderHelper.generate_index_function(
+    BioGenerics.ReaderHelper.generate_index_function(
         Record,
         sam_record_machine,
         :(mark = offset = 0),
         sam_record_actions))
 eval(
-    BioCore.ReaderHelper.generate_read_function(
+    BioGenerics.ReaderHelper.generate_read_function(
         Reader,
         sam_body_machine,
         :(mark = offset = 0),
         merge(sam_record_actions, Dict(
             :record    => quote
-                BioCore.ReaderHelper.resize_and_copy!(record.data, data, BioCore.ReaderHelper.upanchor!(stream):p-1)
+                BioGenerics.ReaderHelper.resize_and_copy!(record.data, data, BioGenerics.ReaderHelper.upanchor!(stream):p-1)
                 record.filled = (offset+1:p-1) .- offset
                 found_record = true
                 @escape
             end,
             :countline => :(linenum += 1),
-            :anchor    => :(BioCore.ReaderHelper.anchor!(stream, p); offset = p - 1)))))
+            :anchor    => :(BioGenerics.ReaderHelper.anchor!(stream, p); offset = p - 1)))))

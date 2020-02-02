@@ -3,7 +3,7 @@
 
 module BAM
 
-using BioCore
+using BioGenerics
 using GenomicFeatures
 using XAM.SAM
 
@@ -11,7 +11,7 @@ import BGZFStreams
 import BioAlignments
 import Indexes
 import BioSequences
-import BioCore: isfilled, header
+import BioGenerics: isfilled, header
 
 import GenomicFeatures: eachoverlap
 

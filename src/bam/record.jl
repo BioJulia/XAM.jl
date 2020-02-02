@@ -566,42 +566,42 @@ function Base.values(record::Record)
 end
 
 
-# BioCore Methods
+# BioGenerics Methods
 # -----------
 
-function BioCore.isfilled(record::Record)
+function BioGenerics.isfilled(record::Record)
     return record.block_size != 0
 end
 
-function BioCore.seqname(record::Record)
+function BioGenerics.seqname(record::Record)
     return tempname(record)
 end
 
-function BioCore.hasseqname(record::Record)
+function BioGenerics.hasseqname(record::Record)
     return hastempname(record)
 end
 
-function BioCore.sequence(record::Record)
+function BioGenerics.sequence(record::Record)
     return sequence(record)
 end
 
-function BioCore.hassequence(record::Record)
+function BioGenerics.hassequence(record::Record)
     return hassequence(record)
 end
 
-function BioCore.leftposition(record::Record)
+function BioGenerics.leftposition(record::Record)
     return position(record)
 end
 
-function BioCore.hasleftposition(record::Record)
+function BioGenerics.hasleftposition(record::Record)
     return hasposition(record)
 end
 
-function BioCore.rightposition(record::Record)
+function BioGenerics.rightposition(record::Record)
     return rightposition(record)
 end
 
-function BioCore.hasrightposition(record::Record)
+function BioGenerics.hasrightposition(record::Record)
     return hasrightposition(record)
 end
 
