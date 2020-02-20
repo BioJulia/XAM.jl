@@ -477,11 +477,11 @@ function hastemplength(record::Record)
 end
 
 """
-    sequence(record::Record)::BioSequences.DNASequence
+    sequence(record::Record)::BioSequences.LongDNASeq
 
 Get the segment sequence of `record`.
 """
-function sequence(record::Record)::BioSequences.DNASequence
+function sequence(record::Record)::BioSequences.LongDNASeq
     checkfilled(record)
     seqlen = seqlength(record)
     data = Vector{UInt64}(undef, cld(seqlen, 16))
@@ -491,7 +491,7 @@ function sequence(record::Record)::BioSequences.DNASequence
         x = unsafe_load(src, i)
         data[i] = (x & 0x0f0f0f0f0f0f0f0f) << 4 | (x & 0xf0f0f0f0f0f0f0f0) >> 4
     end
-    return BioSequences.DNASequence(data, 1:seqlen, false)
+    return BioSequences.LongDNASeq(data, 1:seqlen, false)
 end
 
 function hassequence(record::Record)

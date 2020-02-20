@@ -66,10 +66,6 @@ function header(reader::Reader; fillSQ::Bool=false)::SAM.Header
     return header
 end
 
-function BioCore.header(reader::Reader)
-    return header(reader)
-end
-
 function Base.seek(reader::Reader, voffset::BGZFStreams.VirtualOffset)
     seek(reader.stream, voffset)
 end

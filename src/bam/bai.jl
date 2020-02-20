@@ -7,7 +7,7 @@
 # An index type for the BAM file format.
 struct BAI
     # BGZF file index
-    index::GenomicFeatures.Indexes.BGZFIndex
+    index::Indexes.BGZFIndex
 
     # number of unmapped reads
     n_no_coors::Union{Nothing, Int}
@@ -44,7 +44,7 @@ function read_bai(input::IO)
 
     # read contents
     n_refs = read(input, Int32)
-    index = GenomicFeatures.Indexes.read_bgzfindex(input, n_refs)
+    index = Indexes.read_bgzfindex(input, n_refs)
     if !eof(input)
         n_no_coors = read(input, UInt64)
     else

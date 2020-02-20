@@ -1,10 +1,13 @@
 module XAM
 
 export
-    BAM,
-    SAM
+    SAM,
+    BAM
 
 include("sam/sam.jl")
 include("bam/bam.jl")
+
+using .SAM
+using .BAM
 
 end # module

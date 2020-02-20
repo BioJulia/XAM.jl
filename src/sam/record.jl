@@ -370,17 +370,17 @@ function hastemplength(record::Record)
 end
 
 """
-    sequence(record::Record)::BioSequences.DNASequence
+    sequence(record::Record)::BioSequences.LongDNASeq
 
 Get the segment sequence of `record`.
 """
-function sequence(record::Record)::BioSequences.DNASequence
+function sequence(record::Record)::BioSequences.LongDNASeq
     checkfilled(record)
     if ismissing(record, record.seq)
         missingerror(:sequence)
     end
     seqlen = length(record.seq)
-    ret = BioSequences.DNASequence(seqlen)
+    ret = BioSequences.LongDNASeq(seqlen)
     BioSequences.encode_copy!(ret, 1, record.data, first(record.seq), seqlen)
     return ret
 end

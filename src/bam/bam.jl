@@ -3,11 +3,18 @@
 
 module BAM
 
+using BioCore
+using GenomicFeatures
+using XAM.SAM
+
 import BGZFStreams
-import BioAlignments: BioAlignments, SAM
-import GenomicFeatures: GenomicFeatures, Interval
+import BioAlignments
+import Indexes
 import BioSequences
-import BioCore: BioCore, isfilled
+import BioCore: isfilled, header
+
+import GenomicFeatures: eachoverlap
+
 
 include("bai.jl")
 include("auxdata.jl")
