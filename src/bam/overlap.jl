@@ -16,7 +16,7 @@ function Base.eltype(::Type{OverlapIterator{T}}) where T
 end
 
 function GenomicFeatures.eachoverlap(reader::Reader, interval::Interval)
-    return GenomicFeatures.eachoverlap(reader, interval.seqname, interval.first:interval.last)
+    return GenomicFeatures.eachoverlap(reader, GenomicFeatures.seqname(interval), GenomicFeatures.leftposition(interval):GenomicFeatures.rightposition(interval))
 end
 
 function GenomicFeatures.eachoverlap(reader::Reader, interval)
