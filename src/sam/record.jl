@@ -494,7 +494,7 @@ function Base.getindex(record::Record, tag::AbstractString)
     end
 
     if typ == UInt8('A')
-        @assert lo == hi
+        @assert lo == hi "Values lo and hi must be equivalent."
         return Char(record.data[lo])
     end
     if typ == UInt8('i')

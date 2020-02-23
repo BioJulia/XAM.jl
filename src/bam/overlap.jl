@@ -50,7 +50,9 @@ function Base.iterate(iter::OverlapIterator)
     if refindex === nothing
         throw(ArgumentError("sequence name $(iter.refname) is not found in the header"))
     end
-    @assert iter.reader.index !== nothing
+
+    @assert iter.reader.index !== nothing "Reader index cannot be nothing."
+
     chunks = Indexes.overlapchunks(iter.reader.index.index, refindex, iter.interval)
     if isempty(chunks)
         return nothing

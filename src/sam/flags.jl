@@ -16,7 +16,7 @@ for (name, bits, doc) in [
         (:QCFAIL,        UInt16(0x200), "QC failure"                                                                ),
         (:DUP,           UInt16(0x400), "optical or PCR duplicate"                                                  ),
         (:SUPPLEMENTARY, UInt16(0x800), "supplementary alignment"                                                   ),]
-    @assert bits isa UInt16
+    @assert bits isa UInt16 "The bits must be of type UInt16."
     sym = Symbol("FLAG_", name)
     docstring = """    $sym
     SAM/BAM flag: $doc
@@ -27,4 +27,3 @@ for (name, bits, doc) in [
         @doc $(docstring) const $(sym) = $(bits)
     end
 end
-
