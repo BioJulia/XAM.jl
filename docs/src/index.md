@@ -1,4 +1,4 @@
-# <img src="./docs/src/assets/logo.svg" width="30%" align="right" /> XAM.jl
+# XAM.jl
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Latest Release](https://img.shields.io/github/release/BioJulia/XAM.jl.svg)](https://github.com/BioJulia/XAM.jl/releases/latest)
@@ -7,11 +7,12 @@
 [![Latest documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://biojulia.github.io/XAM.jl/dev/)
 [![Join the chat at https://gitter.im/BioJulia/XAM.jl](https://badges.gitter.im/BioJulia/XAM.jl.svg)](https://gitter.im/BioJulia/XAM.jl)
 
-> This project follows the [semver](http://semver.org) pro forma and uses the [git-flow branching model](https://nvie.com/posts/a-successful-git-branching-model/ "original
-blog post").
+> This project follows the [semver](http://semver.org) pro forma and uses the [git-flow branching model](https://nvie.com/posts/a-successful-git-branching-model/).
 
 ## Description
+
 XAM provides I/O and utilities for manipulating SAM and BAM formatted alignment map files.
+
 
 ## Installation
 The latest version of XAM is made available to install through BioJulia's package registry.

@@ -1,15 +1,10 @@
 # SAM and BAM
 
-
 ## Introduction
 
-High-throughput sequencing (HTS) technologies generate a large amount of data in the form of a large number of nucleotide sequencing reads.
-One of the most common tasks in bioinformatics is to align these reads against known reference genomes, chromosomes, or contigs.
-BioAlignments provides several data formats commonly used for this kind of task.
+The `XAM` package offers high-performance tools for SAM and BAM file formats, which are the most popular file formats.
 
-BioAlignments offers high-performance tools for SAM and BAM file formats, which are the most popular file formats.
-
-If you have questions about the SAM and BAM formats or any of the terminology used when discussing these formats, see the published [specification][samtools-spec], which is maintained by the [samtools group][samtools].
+If you have questions about the SAM and BAM formats or any of the terminology used when discussing these formats, see the published [specification](https://samtools.github.io/hts-specs/SAMv1.pdf), which is maintained by the [samtools group](https://samtools.github.io/).
 
 A very very simple SAM file looks like the following:
 
@@ -28,7 +23,7 @@ Where the first two lines are part of the "header", and the following lines are 
 Each record describes how a read aligns to some reference sequence.
 Sometimes one record describes one read, but there are other cases like chimeric reads and split alignments, where multiple records apply to one read.
 In the example above, `r003` is a chimeric read, and `r004` is a split alignment, and `r001` are mate pair reads.
-Again, we refer you to the official [specification][samtools-spec] for more details.
+Again, we refer you to the official [specification](https://samtools.github.io/hts-specs/SAMv1.pdf) for more details.
 
 A BAM file stores this same information but in a binary and compressible format that does not make for pretty printing here!
 
@@ -37,7 +32,7 @@ A BAM file stores this same information but in a binary and compressible format 
 A typical script iterating over all records in a file looks like below:
 
 ```julia
-using BioAlignments
+using XAM
 
 # Open a BAM file.
 reader = open(BAM.Reader, "data.bam")
@@ -72,7 +67,7 @@ end
 
 Both `SAM.Reader` and `BAM.Reader` implement the `header` function, which returns a `SAM.Header` object.
 To extract certain information out of the headers, you can use the `find` method on the header to extract information according to SAM/BAM tag.
-Again we refer you to the [specification][samtools-spec] for full details of all the different tags that can occur in headers, and what they mean.
+Again we refer you to the [specification](https://samtools.github.io/hts-specs/SAMv1.pdf) for full details of all the different tags that can occur in headers, and what they mean.
 
 Below is an example of extracting all the info about the reference sequences from the BAM header.
 In SAM/BAM, any description of a reference sequence is stored in the header, under a tag denoted `SQ` (think `reference SeQuence`!).
@@ -110,7 +105,8 @@ In the above we can see there were 7 sequences in the reference: 5 chromosomes, 
 
 ## SAM and BAM Records
 
-BioAlignments supports the following accessors for `SAM.Record` types.
+### SAM.Record
+The `XAM` package supports the following accessors for `SAM.Record` types.
 
 ```@docs
 XAM.SAM.flag
@@ -134,7 +130,8 @@ XAM.SAM.quality
 XAM.SAM.auxdata
 ```
 
-BioAlignments supports the following accessors for `BAM.Record` types.
+### BAM.Record
+The `XAM` package supports the following accessors for `BAM.Record` types.
 
 ```@docs
 XAM.BAM.flag
@@ -178,7 +175,7 @@ Tagged auxiliary data follows a format of `TAG:TYPE:VALUE`.
 | 'H'  | Byte array in Hex format          |
 | 'B'  | Integer of numeric array          |
 
-For more information about these tags and their types we refer you to the [SAM/BAM specification][samtools-spec] and the additional [optional fields specification][samtags] document.
+For more information about these tags and their types we refer you to the [SAM/BAM specification](https://samtools.github.io/hts-specs/SAMv1.pdf) and the additional [optional fields specification](https://samtools.github.io/hts-specs/SAMtags.pdf) document.
 
 There are some tags that are reserved, predefined standard tags, for specific uses.
 
@@ -200,8 +197,8 @@ end
 
 ## Getting records in a range
 
-BioAlignments supports the BAI index to fetch records in a specific range from a BAM file.
-[Samtools][samtools] provides `index` subcommand to create an index file (.bai) from a sorted BAM file.
+The `XAM` package supports the BAI index to fetch records in a specific range from a BAM file.
+[Samtools](https://samtools.github.io/) provides `index` subcommand to create an index file (.bai) from a sorted BAM file.
 
 ```console
 $ samtools index -b SRR1238088.sort.bam
@@ -209,7 +206,7 @@ $ ls SRR1238088.sort.bam*
 SRR1238088.sort.bam     SRR1238088.sort.bam.bai
 ```
 
-`eachoverlap(reader, chrom, range)` returns an iterator of BAM records overlapping the query interval:
+The method `eachoverlap(reader, chrom, range)` returns an iterator of BAM records overlapping the query interval:
 
 ```julia
 reader = open(BAM.Reader, "SRR1238088.sort.bam", index="SRR1238088.sort.bam.bai")
@@ -222,14 +219,14 @@ close(reader)
 
 ## Getting records overlapping genomic features
 
-`eachoverlap` also accepts the `Interval` type defined in [GenomicFeatures.jl][genomicfeatures].
+The `eachoverlap` method also accepts the `Interval` type defined in [GenomicFeatures.jl](https://github.com/BioJulia/GenomicFeatures.jl).
 
 This allows you to do things like first read in the genomic features from a GFF3 file, and then for each feature, iterate over all the BAM records that overlap with that feature.
 
 ```julia
-# Load GFF3 module.
 using GenomicFeatures
-using BioAlignments
+using GFF3
+using XAM
 
 # Load genomic features from a GFF3 file.
 features = open(collect, GFF3.Reader, "TAIR10_GFF3_genes.gff")
@@ -289,7 +286,7 @@ SAM.Writer(IOStream(<file my-data.sam>))
 
 ```
 
-To make a BAM Writer is slightly different, as you need to use a specific stream type from the [BGZFStreams][bgzfstreams] package:
+To make a BAM Writer is slightly different, as you need to use a specific stream type from the (https://github.com/BioJulia/BGZFStreams.jl)[https://github.com/BioJulia/BGZFStreams.jl] package:
 
 ```julia
 julia> using BGZFStreams
@@ -305,9 +302,3 @@ Once you have a BAM or SAM writer, you can use the `write` method to write `BAM.
 julia> write(bamw, rec) # Here rec is a `BAM.Record`
 330780
 ```
-
-[samtools]:      https://samtools.github.io/
-[samtools-spec]: https://samtools.github.io/hts-specs/SAMv1.pdf
-[samtags]:       https://samtools.github.io/hts-specs/SAMtags.pdf
-[bgzfstreams]:   https://github.com/BioJulia/BGZFStreams.jl
-[genomicfeatures]:   https://github.com/BioJulia/GenomicFeatures.jl
