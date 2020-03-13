@@ -321,15 +321,15 @@ function alignlength(record::Record)::Int
     len = 0  # operation length
     for i in record.cigar
         c = record.data[i]
-        if c ∈ UInt8('0'):UInt8('9')
+        if in(c, UInt8('0'):UInt8('9'))
             len = len * 10 + (c - UInt8('0'))
-        else
-            op = convert(BioAlignments.Operation, Char(c))
-            if BioAlignments.ismatchop(op) || BioAlignments.isdeleteop(op)
-                ret += len
-            end
-            len = 0
+            continue
         end
+        op = convert(BioAlignments.Operation, Char(c))
+        if BioAlignments.ismatchop(op) || BioAlignments.isdeleteop(op) #Note: reference consuming ops ('M', 'D', 'N', '=', 'X').
+            ret += len
+        end
+        len = 0
     end
     return ret
 end
