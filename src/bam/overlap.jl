@@ -16,7 +16,7 @@ function Base.eltype(::Type{OverlapIterator{T}}) where T
 end
 
 function GenomicFeatures.eachoverlap(reader::Reader, interval::Interval)
-    return GenomicFeatures.eachoverlap(reader, interval.seqname, interval.first:interval.last)
+    return GenomicFeatures.eachoverlap(reader, GenomicFeatures.seqname(interval), GenomicFeatures.leftposition(interval):GenomicFeatures.rightposition(interval))
 end
 
 function GenomicFeatures.eachoverlap(reader::Reader, interval)
@@ -67,7 +67,8 @@ function Base.iterate(iter::OverlapIterator, state)
             c = compare_intervals(state.record, (state.refindex, iter.interval))
             if c == 0
                 return copy(state.record), state
-            elseif c > 0
+            end
+            if c > 0
                 # no more overlapping records in this chunk since records are sorted
                 break
             end
@@ -82,14 +83,18 @@ end
 
 function compare_intervals(record::Record, interval::Tuple{Int,UnitRange{Int}})
     rid = refid(record)
+
     if rid < interval[1] || (rid == interval[1] && rightposition(record) < first(interval[2]))
         # strictly left
         return -1
-    elseif rid > interval[1] || (rid == interval[1] && position(record) > last(interval[2]))
+    end
+
+    if rid > interval[1] || (rid == interval[1] && position(record) > last(interval[2]))
         # strictly right
         return +1
-    else
-        # overlapping
-        return 0
     end
+
+    # overlapping
+    return 0
+
 end

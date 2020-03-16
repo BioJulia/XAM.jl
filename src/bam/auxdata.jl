@@ -72,12 +72,15 @@ function loadauxtype(data::Vector{UInt8}, p::Int)
             b == UInt8('Z') ? String :
             error("invalid type tag: '$(Char(b))'"))
     end
+
     t = data[p]
+
     if t == UInt8('B')
         return p + 2, Vector{auxtype(data[p+1])}
-    else
-        return p + 1, auxtype(t)
     end
+
+    return p + 1, auxtype(t)
+    
 end
 
 function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{T}) where T
@@ -105,14 +108,17 @@ end
 
 function findauxtag(data::Vector{UInt8}, start::Int, stop::Int, t1::UInt8, t2::UInt8)
     pos = start
+
     while pos ≤ stop && !(data[pos] == t1 && data[pos+1] == t2)
         pos = next_tag_position(data, pos)
     end
+
     if pos > stop
         return 0
-    else
-        return pos
     end
+
+    return pos
+
 end
 
 # Find the starting position of a next tag in `data` after `p`.
@@ -120,24 +126,40 @@ end
 function next_tag_position(data::Vector{UInt8}, p::Int)
     typ = Char(data[p+2])
     p += 3
+
     if typ == 'A'
-        p += 1
-    elseif typ == 'c' || typ == 'C'
-        p += 1
-    elseif typ == 's' || typ == 'S'
-        p += 2
-    elseif typ == 'i' || typ == 'I'
-        p += 4
-    elseif typ == 'f'
-        p += 4
-    elseif typ == 'd'
-        p += 8
-    elseif typ == 'Z' || typ == 'H'
+        return p += 1
+    end
+
+    if typ == 'c' || typ == 'C'
+        return p += 1
+    end
+
+    if typ == 's' || typ == 'S'
+        return p += 2
+    end
+
+    if typ == 'i' || typ == 'I'
+        return p += 4
+    end
+
+    if typ == 'f'
+        return p += 4
+    end
+
+    if typ == 'd'
+        return p += 8
+    end
+
+    if typ == 'Z' || typ == 'H'
         while data[p] != 0x00  # NULL-terminalted string
             p += 1
         end
-        p += 1
-    elseif typ == 'B'
+        return p += 1
+
+    end
+
+    if typ == 'B'
         eltyp = Char(data[p])
         elsize = eltyp == 'c' || eltyp == 'C'                 ? 1 :
                  eltyp == 's' || eltyp == 'S'                 ? 2 :
@@ -145,9 +167,9 @@ function next_tag_position(data::Vector{UInt8}, p::Int)
                  error("invalid type tag: '$(Char(eltyp))'")
         p += 1
         n = unsafe_load(Ptr{Int32}(pointer(data, p)))
-        p += 4 + elsize * n
-    else
-        error("invalid type tag: '$(Char(typ))'")
+        return p += 4 + elsize * n
     end
-    return p
+
+    error("invalid type tag: '$(Char(typ))'")
+
 end

@@ -10,7 +10,7 @@ Create a data writer of the BAM file format.
 * `output`: data sink
 * `header`: SAM header object
 """
-mutable struct Writer <: BioCore.IO.AbstractWriter
+mutable struct Writer <: BioGenerics.IO.AbstractWriter
     stream::BGZFStreams.BGZFStream
 end
 
@@ -25,7 +25,7 @@ function Writer(stream::BGZFStreams.BGZFStream, header::SAM.Header)
     return Writer(stream)
 end
 
-function BioCore.IO.stream(writer::Writer)
+function BioGenerics.IO.stream(writer::Writer)
     return writer.stream
 end
 
