@@ -14,6 +14,10 @@ function Header()
     return Header(MetaInfo[])
 end
 
+function Base.:(==)(a::Header, b::Header)
+    return a.metainfo == b.metainfo
+end
+
 function Base.copy(header::Header)
     return Header(header.metainfo)
 end
