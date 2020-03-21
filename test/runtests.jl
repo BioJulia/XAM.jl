@@ -172,15 +172,27 @@ end
             mktemp() do path, io
                 # copy
                 reader = open(SAM.Reader, filepath)
-                writer = SAM.Writer(io, header(reader))
+
+                header_original = header(reader)
+
+                writer = SAM.Writer(io, header_original)
+
                 records = SAM.Record[]
                 for record in reader
                     push!(records, record)
                     write(writer, record)
                 end
+
                 close(reader)
                 close(writer)
-                @test compare_records(open(collect, SAM.Reader, path), records)
+
+                reader = open(SAM.Reader, path)
+
+                @test header(reader) == header_original
+                @test compare_records(collect(reader), records)
+
+                close(reader)
+
             end
         end
     end
@@ -378,8 +390,11 @@ end
                 else
                     reader = open(BAM.Reader, filepath)
                 end
-                writer = BAM.Writer(
-                    BGZFStream(path, "w"), BAM.header(reader, fillSQ=isempty(findall(header(reader), "SQ"))))
+
+                header_original = header(reader)
+
+                writer = BAM.Writer(BGZFStream(path, "w"), BAM.header(reader, fillSQ=isempty(findall(header(reader), "SQ"))))
+
                 records = BAM.Record[]
                 for record in reader
                     push!(records, record)
@@ -387,7 +402,14 @@ end
                 end
                 close(reader)
                 close(writer)
-                @test compare_records(open(collect, BAM.Reader, path), records)
+
+                reader = open(BAM.Reader, path)
+
+                @test header(reader) == header_original
+                @test compare_records(collect(reader), records)
+
+                close(reader)
+
             end
         end
     end
