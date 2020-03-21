@@ -165,6 +165,19 @@ function appendfrom!(dst, dpos, src, spos, n)
     return dst
 end
 
+const action_metainfo = quote
+
+    let markpos = @markpos()
+
+        appendfrom!(metainfo.data, 1, data, markpos, length(markpos:p-1))
+
+        metainfo.filled = @relpos(markpos):@relpos(p-1)
+
+        found_metainfo = true
+    end
+
+end
+
 const sam_actions_metainfo = Dict(
     :mark => :(@mark),
     :pos1  => :(pos1 = @relpos(p)),
@@ -173,22 +186,18 @@ const sam_actions_metainfo = Dict(
     :metainfo_val => :(metainfo.val = pos1:@relpos(p-1)),
     :metainfo_dict_key => :(push!(metainfo.dictkey, pos2:@relpos(p-1))),
     :metainfo_dict_val => :(push!(metainfo.dictval, pos2:@relpos(p-1))),
-    :metainfo => quote
-        let markpos = @markpos()
-
-            appendfrom!(metainfo.data, 1, data, markpos, length(markpos:p-1))
-
-            metainfo.filled = @relpos(markpos):@relpos(p-1)
-
-            found_metainfo = true
-        end
-    end
+    :metainfo => action_metainfo
 )
 
 const sam_actions_header = merge(
     sam_actions_metainfo,
     Dict(
         :countline => :(linenum += 1),
+        :metainfo => quote
+            $(action_metainfo)
+            push!(header, metainfo)
+            metainfo = MetaInfo()
+        end,
         :header => quote
 
             finish_header = true
@@ -308,13 +317,6 @@ const sam_loopcode_header = quote
     if cs < 0
         throw(ArgumentError("malformed metainfo at line $(linenum)"))
     end
-
-    if found_metainfo
-        push!(header, metainfo)
-        found_metainfo = false
-    end
-
-    metainfo = MetaInfo()
 
     if finish_header
         @goto __return__
