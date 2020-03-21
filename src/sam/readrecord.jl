@@ -161,7 +161,7 @@ function appendfrom!(dst, dpos, src, spos, n)
     if length(dst) < dpos + n - 1
         resize!(dst, dpos + n - 1)
     end
-    copyto!(dst, dpos, src, spos, n)
+    unsafe_copyto!(dst, dpos, src, spos, n)
     return dst
 end
 
