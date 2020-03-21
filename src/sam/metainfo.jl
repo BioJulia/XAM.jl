@@ -12,6 +12,15 @@ mutable struct MetaInfo
     dictval::Vector{UnitRange{Int}}
 end
 
+function Base.:(==)(a::MetaInfo, b::MetaInfo)
+    return a.data == b.data &&
+        a.filled  == b.filled &&
+        a.tag     == b.tag &&
+        a.val     == b.val &&
+        a.dictkey == b.dictkey &&
+        a.dictval == b.dictval
+end
+
 function MetaInfo(data::Vector{UInt8}=UInt8[])
     metainfo = MetaInfo(data, 1:0, 1:0, 1:0, UnitRange{Int}[], UnitRange{Int}[])
     if !isempty(data)
