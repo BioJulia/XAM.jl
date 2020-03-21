@@ -39,7 +39,7 @@ Create a SAM metainfo from `str`.
 
 """
 function MetaInfo(str::AbstractString)
-    return MetaInfo(Vector{UInt8}(str))
+    return MetaInfo(collect(UInt8, str))
 end
 
 """

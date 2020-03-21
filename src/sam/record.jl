@@ -71,7 +71,7 @@ function Record(str::AbstractString)
 end
 
 function Base.convert(::Type{Record}, str::AbstractString)
-    return Record(Vector{UInt8}(str))
+    return Record(collect(UInt8, str))
 end
 
 function Base.show(io::IO, record::Record)
