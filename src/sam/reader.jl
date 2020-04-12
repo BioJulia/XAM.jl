@@ -83,6 +83,8 @@ end
 
 function Base.read!(rdr::Reader, rec::Record)
 
+    empty!(rec.fields) #Note: data is pushed to the fields field, and other field data is overwritten. #TODO: distinguish for inplace reading pattern.
+
     cs, ln, f = readrecord!(rdr.state.stream, rec, (rdr.state.state, rdr.state.linenum))
 
     rdr.state.state = cs
