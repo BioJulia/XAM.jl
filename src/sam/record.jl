@@ -74,6 +74,23 @@ function Base.convert(::Type{Record}, str::AbstractString)
     return Record(Vector{UInt8}(str))
 end
 
+function Base.:(==)(a::Record, b::Record)
+    return a.filled == b.filled &&
+        a.qname     == b.qname &&
+        a.flag      == b.flag &&
+        a.rname     == b.rname &&
+        a.pos       == b.pos &&
+        a.mapq      == b.mapq &&
+        a.cigar     == b.cigar &&
+        a.rnext     == b.rnext &&
+        a.pnext     == b.pnext &&
+        a.tlen      == b.tlen &&
+        a.seq       == b.seq &&
+        a.qual      == b.qual &&
+        a.fields    == b.fields &&
+        a.data[a.filled] == b.data[b.filled]
+end
+
 function Base.show(io::IO, record::Record)
     print(io, summary(record), ':')
     if isfilled(record)
