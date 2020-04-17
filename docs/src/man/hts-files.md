@@ -58,6 +58,7 @@ In-place reading reuses a pre-allocated object for every record and less memory 
 reader = open(BAM.Reader, "data.bam")
 record = BAM.Record()
 while !eof(reader)
+    empty!(record)
     read!(reader, record)
     # do something
 end
