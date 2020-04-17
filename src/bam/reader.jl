@@ -72,12 +72,11 @@ function Base.seekstart(reader::Reader)
     seek(reader.stream, reader.start_offset)
 end
 
-function Base.iterate(reader::Reader, rec=Record())
-    if eof(reader)
+function Base.iterate(reader::Reader, nextone = Record())
+    if BioGenerics.IO.tryread!(reader, nextone) === nothing
         return nothing
     end
-    read!(reader, rec)
-    return copy(rec), rec
+    return copy(nextone), empty!(nextone)
 end
 
 # Initialize a BAM reader by reading the header section.

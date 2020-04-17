@@ -45,6 +45,19 @@ function Base.convert(::Type{Record}, data::Vector{UInt8})
     return record
 end
 
+function Base.:(==)(a::Record, b::Record)
+    return a.block_size == b.block_size &&
+        a.refid         == b.refid &&
+        a.pos           == b.pos &&
+        a.bin_mq_nl     == b.bin_mq_nl &&
+        a.flag_nc       == b.flag_nc &&
+        a.l_seq         == b.l_seq &&
+        a.next_refid    == b.next_refid &&
+        a.next_pos      == b.next_pos &&
+        a.tlen          == b.tlen &&
+        a.data[1:data_size(a)] == b.data[1:data_size(b)]
+end
+
 function Base.copy(record::Record)
     copy = Record()
     copy.block_size = record.block_size
@@ -61,6 +74,22 @@ function Base.copy(record::Record)
         copy.reader = record.reader
     end
     return copy
+end
+
+function Base.empty!(record::Record)
+    record.block_size = 0
+    record.refid      = 0
+    record.pos        = 0
+    record.bin_mq_nl  = 0
+    record.flag_nc    = 0
+    record.l_seq      = 0
+    record.next_refid = 0
+    record.next_pos   = 0
+    record.tlen       = 0
+
+    #Note: data will be overwritten and indexed using data_size.
+    
+    return record
 end
 
 function Base.show(io::IO, record::Record)

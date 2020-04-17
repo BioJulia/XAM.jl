@@ -196,6 +196,29 @@ end
             end
         end
     end
+
+    @testset "In-Place-Reading Pattern" begin
+
+        file_sam = joinpath(samdir, "ce#5b.sam")
+
+        records = open(collect, SAM.Reader, file_sam)
+
+        reader = open(SAM.Reader, file_sam)
+        record = SAM.Record()
+        i = 0
+        while !eof(reader)
+            empty!(record) # Reset the record.
+            read!(reader, record)
+
+            i = i + 1
+
+            @test records[i] == record
+
+        end
+
+        close(reader)
+
+    end
 end
 
 @testset "BAM" begin
@@ -412,6 +435,27 @@ end
 
             end
         end
+    end
+
+    @testset "In-Place-Reading Pattern" begin
+
+        file_bam = joinpath(bamdir, "ce#5b.bam")
+
+        records = open(collect, BAM.Reader, file_bam)
+
+        reader = open(BAM.Reader, file_bam)
+        record = BAM.Record()
+        i = 0
+        while !eof(reader)
+            empty!(record) # Reset the record.
+            read!(reader, record)
+
+            i = i + 1
+            @test records[i] == record
+        end
+
+        close(reader)
+
     end
 
     @testset "Random access" begin
