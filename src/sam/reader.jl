@@ -81,9 +81,20 @@ function index!(record::Record)
     return record
 end
 
-function Base.read!(rdr::Reader, rec::Record)
+function Base.iterate(reader::Reader, nextone::Record = Record())
+    if BioGenerics.IO.tryread!(reader, nextone) === nothing
+        return nothing
+    end
+    return copy(nextone), empty!(nextone)
+end
 
-    empty!(rec.fields) #Note: data is pushed to the fields field, and other field data is overwritten. #TODO: distinguish for inplace reading pattern.
+"""
+    read!(rdr::Reader, rec::Record)
+
+Read a `Record` into `rec`; overwriting or adding to existing field values.
+It is assumed that `rec` is already initialized or empty.
+"""
+function Base.read!(rdr::Reader, rec::Record)
 
     cs, ln, f = readrecord!(rdr.state.stream, rec, (rdr.state.state, rdr.state.linenum))
 

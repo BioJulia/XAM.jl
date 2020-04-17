@@ -74,6 +74,23 @@ function Base.convert(::Type{Record}, str::AbstractString)
     return Record(collect(UInt8, str))
 end
 
+function Base.:(==)(a::Record, b::Record)
+    return a.filled == b.filled &&
+        a.qname     == b.qname &&
+        a.flag      == b.flag &&
+        a.rname     == b.rname &&
+        a.pos       == b.pos &&
+        a.mapq      == b.mapq &&
+        a.cigar     == b.cigar &&
+        a.rnext     == b.rnext &&
+        a.pnext     == b.pnext &&
+        a.tlen      == b.tlen &&
+        a.seq       == b.seq &&
+        a.qual      == b.qual &&
+        a.fields    == b.fields &&
+        a.data[a.filled] == b.data[b.filled]
+end
+
 function Base.show(io::IO, record::Record)
     print(io, summary(record), ':')
     if isfilled(record)
@@ -554,7 +571,7 @@ end
 # Helper Functions
 # ----------------
 
-function initialize!(record::Record)
+function Base.empty!(record::Record)
     record.filled = 1:0
     record.qname = 1:0
     record.flag = 1:0
@@ -569,6 +586,10 @@ function initialize!(record::Record)
     record.qual = 1:0
     empty!(record.fields)
     return record
+end
+
+function initialize!(record::Record) #TODO: deprecate.
+    return empty!(record)
 end
 
 function checkfilled(record::Record)
