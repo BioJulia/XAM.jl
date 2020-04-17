@@ -76,6 +76,22 @@ function Base.copy(record::Record)
     return copy
 end
 
+function Base.empty!(record::Record)
+    record.block_size = 0
+    record.refid      = 0
+    record.pos        = 0
+    record.bin_mq_nl  = 0
+    record.flag_nc    = 0
+    record.l_seq      = 0
+    record.next_refid = 0
+    record.next_pos   = 0
+    record.tlen       = 0
+
+    #Note: data will be overwritten and indexed using data_size.
+    
+    return record
+end
+
 function Base.show(io::IO, record::Record)
     print(io, summary(record), ':')
     if isfilled(record)

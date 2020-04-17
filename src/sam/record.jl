@@ -571,7 +571,7 @@ end
 # Helper Functions
 # ----------------
 
-function initialize!(record::Record)
+function Base.empty!(record::Record)
     record.filled = 1:0
     record.qname = 1:0
     record.flag = 1:0
@@ -586,6 +586,10 @@ function initialize!(record::Record)
     record.qual = 1:0
     empty!(record.fields)
     return record
+end
+
+function initialize!(record::Record) #TODO: deprecate.
+    return empty!(record)
 end
 
 function checkfilled(record::Record)
