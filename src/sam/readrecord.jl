@@ -286,11 +286,6 @@ const sam_initcode_body = quote
 end
 
 const sam_loopcode_metainfo = quote
-
-    if cs < 0
-        throw(ArgumentError("malformed metainfo at pos $(p)"))
-    end
-
     if found_metainfo
         @goto __return__
     end
@@ -313,11 +308,6 @@ Automa.Stream.generate_reader(
 ) |> eval
 
 const sam_loopcode_header = quote
-
-    if cs < 0
-        throw(ArgumentError("malformed metainfo at line $(linenum)"))
-    end
-
     if finish_header
         @goto __return__
     end
@@ -340,19 +330,9 @@ Automa.Stream.generate_reader(
 
 
 const sam_loopcode_record = quote
-
-    if cs < 0
-        throw(ArgumentError("malformed SAM record at position $(p), line $(linenum)"))
-    end
-
-    # # if cs != 0
-    # #     throw(ArgumentError(string("failed to index ", $(record_type), " ~>", repr(String(data[p:min(p+7,p_end)])))))
-    # # end
-
     if found_record
         @goto __return__
     end
-
 end
 
 const sam_loopcode_body = quote
