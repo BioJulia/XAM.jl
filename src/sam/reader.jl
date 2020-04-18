@@ -16,6 +16,11 @@ function Reader(state::State{S}) where {S <: TranscodingStream}
     rdr.state.linenum = ln
     rdr.state.filled = false
 
+    if !f
+        cs == 0 && throw(EOFError())
+        throw(ArgumentError("Malformed SAM file at line $(ln)."))
+    end
+    
     return rdr
 end
 
@@ -104,7 +109,8 @@ function Base.read!(rdr::Reader, rec::Record)
 
     if !f
         cs == 0 && throw(EOFError())
-        throw(ArgumentError("malformed SAM file"))
+        throw(ArgumentError("Malformed SAM file at line $(ln)."))
     end
+
     return rec
 end
