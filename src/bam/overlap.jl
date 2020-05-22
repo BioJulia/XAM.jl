@@ -47,7 +47,7 @@ end
 
 function Base.iterate(iter::OverlapIterator)
     refindex = findfirst(isequal(iter.refname), iter.reader.refseqnames)
-    if refindex == 0
+    if refindex === nothing
         throw(ArgumentError("sequence name $(iter.refname) is not found in the header"))
     end
     @assert iter.reader.index !== nothing
