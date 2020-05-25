@@ -23,7 +23,7 @@ BioSequences = "2"
 GenomicFeatures = "2"
 Indexes = "0.1"
 TranscodingStreams = "0.6, 0.7, 0.8, 0.9"
-julia = "1.1"
+julia = "1"
 
 [extras]
 FormatSpecimens = "3372ea36-2a1a-11e9-3eb7-996970b6ffbd"
