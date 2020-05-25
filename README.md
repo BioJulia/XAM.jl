@@ -11,18 +11,11 @@
 blog post").
 
 ## Description
-XAM provides I/O and utilities for manipulating SAM and BAM formatted alignment map files.
+The XAM package provides I/O and utilities for manipulating SAM and BAM formatted alignment map files.
 
 ## Installation
-The latest version of XAM is made available to install through BioJulia's package registry.
-By default, Julia's package manager only includes the "General" package registry.
-
-To add the BioJulia registry from the [Julia REPL](https://docs.julialang.org/en/v1/manual/getting-started/), press `]` to enter [pkg mode](https://docs.julialang.org/en/v1/stdlib/Pkg/), then enter the following command:
-```julia
-registry add https://github.com/BioJulia/BioJuliaRegistry.git
-```
-
-Once the registry is added to your configuration, you can install XAM while in [pkg mode](https://docs.julialang.org/en/v1/stdlib/Pkg/) with the following:
+You can install the XAM package from the [Julia REPL](https://docs.julialang.org/en/v1/manual/getting-started/).
+Press `]` to enter [pkg mode](https://docs.julialang.org/en/v1/stdlib/Pkg/), then enter the following command:
 ```julia
 add XAM
 ```
