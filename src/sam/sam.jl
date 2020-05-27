@@ -5,9 +5,6 @@ module SAM
 
 using BioGenerics
 
-import Automa
-import Automa.RegExp: @re_str
-import Automa.Stream: @mark, @markpos, @relpos, @abspos
 import BioAlignments
 import BioGenerics: BioGenerics, isfilled, header
 import BioGenerics.Exceptions: missingerror
