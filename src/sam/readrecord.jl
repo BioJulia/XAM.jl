@@ -135,13 +135,13 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
         cat(re"\r?", lf)
     end
 
-    header = rep1(cat(metainfo, newline))
+    header = rep(cat(metainfo, newline))
     header.actions[:exit] = [:header]
 
-    body = record * rep1(cat(record, newline))
+    body = record * rep(newline * record) * opt(newline)
     body.actions[:exit]  = [:body]
 
-    sam = cat(opt(header), opt(body))
+    sam = cat(header, opt(body))
 
     return map(Automa.compile, (metainfo, record, header, body, sam))
 end)()
@@ -198,12 +198,12 @@ const sam_actions_header = merge(
     Dict(
         :countline => :(linenum += 1),
         :metainfo => quote
+            finish_header = true
             $(action_metainfo)
             push!(header, metainfo)
             metainfo = MetaInfo()
         end,
         :header => quote
-            finish_header = true
             @escape
         end
     )
