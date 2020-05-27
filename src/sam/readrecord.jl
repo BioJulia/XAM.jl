@@ -10,7 +10,7 @@ import Automa.Stream: @mark, @markpos, @relpos, @abspos
 # body   = record*
 const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_body, sam_machine = (function ()
 
-    isinteractive() && info("compiling SAM")
+    isinteractive() && @info "compiling SAM"
 
     cat = Automa.RegExp.cat
     rep = Automa.RegExp.rep
