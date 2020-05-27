@@ -1,6 +1,10 @@
 # Automa.jl generated readrecord! and readmetainfo! functions
 # ========================================
 
+import Automa
+import Automa.RegExp: @re_str
+import Automa.Stream: @mark, @markpos, @relpos, @abspos
+
 # file   = header . body
 # header = metainfo*
 # body   = record*
