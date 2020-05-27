@@ -14,6 +14,7 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
 
     cat = Automa.RegExp.cat
     rep = Automa.RegExp.rep
+    rep1 = Automa.RegExp.rep1
     alt = Automa.RegExp.alt
     opt = Automa.RegExp.opt
     any = Automa.RegExp.any
@@ -134,14 +135,13 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
         cat(re"\r?", lf)
     end
 
-    header′ = rep(cat(metainfo, newline))
-    header′.actions[:exit] = [:header]
-    header = cat(header′, opt(any() \ cat('@')))  # look ahead
+    header = rep1(cat(metainfo, newline))
+    header.actions[:exit] = [:header]
 
-    body = rep(cat(record, newline))
+    body = record * rep1(cat(record, newline))
     body.actions[:exit]  = [:body]
 
-    sam = cat(header, body)
+    sam = cat(opt(header), opt(body))
 
     return map(Automa.compile, (metainfo, record, header, body, sam))
 end)()
@@ -203,13 +203,7 @@ const sam_actions_header = merge(
             metainfo = MetaInfo()
         end,
         :header => quote
-
             finish_header = true
-
-            if !eof(stream)
-                p -= 1 # cancel look-ahead
-            end
-
             @escape
         end
     )
