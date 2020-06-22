@@ -1,11 +1,11 @@
-name: Documentation
+name: Build Documentation
 
 on:
   push:
     branches:
       - master
       - develop
-      - release/.*
+      - release/*
     tags: '*'
   pull_request:
 
@@ -17,9 +17,9 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
-      - name: Install dependencies
+      - name: Install Dependencies
         run: julia --color=yes --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-      - name: Build and deploy
+      - name: Build and Deploy
         env:
           # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For authentication with GitHub Actions token
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # For authentication with SSH deploy key
