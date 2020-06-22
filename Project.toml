@@ -1,7 +1,7 @@
 name = "XAM"
 uuid = "d759349c-bcba-11e9-07c2-5b90f8f05f7c"
 authors = ["Kenta Sato <bicycle1885@gmail.com>", "Ben J. Ward <ward9250@gmail.com>", "Ciarán O'Mara <Ciaran.OMara@utas.edu.au>"]
-version = "0.2.4"
+version = "0.2.5"
 
 [deps]
 Automa = "67c07d97-cdcb-5c2c-af73-a7f9c32a568b"
@@ -19,11 +19,11 @@ Automa = "0.7, 0.8"
 BGZFStreams = "0.3"
 BioAlignments = "2"
 BioGenerics = "0.1"
-BioSequences = "2"
+BioSequences = "2.0.4"
 GenomicFeatures = "2"
 Indexes = "0.1"
 TranscodingStreams = "0.6, 0.7, 0.8, 0.9"
-julia = "1.1"
+julia = "1"
 
 [extras]
 FormatSpecimens = "3372ea36-2a1a-11e9-3eb7-996970b6ffbd"

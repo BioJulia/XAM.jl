@@ -48,7 +48,7 @@ Create a SAM metainfo from `str`.
 
 """
 function MetaInfo(str::AbstractString)
-    return MetaInfo(Vector{UInt8}(str))
+    return MetaInfo(collect(UInt8, str))
 end
 
 """
@@ -198,7 +198,7 @@ function keyvalues(metainfo::MetaInfo)::Vector{Pair{String,String}}
     if iscomment(metainfo)
         throw(ArgumentError("not a dictionary"))
     end
-    return Pair{String,String}[key => val for (key, val) in zip(keys(metainfo), values(metainfo))]
+    return Pair{String, String}.(keys(metainfo), values(metainfo))
 end
 
 function Base.keys(metainfo::MetaInfo)

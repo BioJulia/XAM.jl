@@ -71,7 +71,7 @@ function Record(str::AbstractString)
 end
 
 function Base.convert(::Type{Record}, str::AbstractString)
-    return Record(Vector{UInt8}(str))
+    return Record(collect(UInt8, str))
 end
 
 function Base.:(==)(a::Record, b::Record)
@@ -399,7 +399,7 @@ function sequence(record::Record)::BioSequences.LongDNASeq
     end
     seqlen = length(record.seq)
     ret = BioSequences.LongDNASeq(seqlen)
-    BioSequences.encode_copy!(ret, 1, record.data, first(record.seq), seqlen)
+    copyto!(ret, 1, record.data, first(record.seq), seqlen)
     return ret
 end
 
