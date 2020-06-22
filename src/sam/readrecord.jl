@@ -170,16 +170,10 @@ function appendfrom!(dst, dpos, src, spos, n)
 end
 
 const action_metainfo = quote
+    appendfrom!(metainfo.data, 1, data, @markpos, p-@markpos)
+    metainfo.filled = 1:(p-@markpos)
 
-    let markpos = @markpos()
-
-        appendfrom!(metainfo.data, 1, data, markpos, length(markpos:p-1))
-
-        metainfo.filled = @relpos(markpos):@relpos(p-1)
-
-        found_metainfo = true
-    end
-
+    found_metainfo = true
 end
 
 const sam_actions_metainfo = Dict(
@@ -231,15 +225,11 @@ const sam_actions_record = Dict(
     :record_qual  => :(record.qual  = pos:@relpos(p-1)),
     :record_field => :(push!(record.fields, pos:@relpos(p-1))),
     :record       => quote
-        let markpos = @markpos()
+        appendfrom!(record.data, 1, data, @markpos, p-@markpos)
+        record.filled = 1:(p-@markpos)
 
-            appendfrom!(record.data, 1, data, markpos, length(markpos:p-1))
-
-            record.filled = @relpos(markpos):@relpos(p-1)
-
-            found_record = true
-            @escape
-        end
+        found_record = true
+        @escape
     end
 )
 
