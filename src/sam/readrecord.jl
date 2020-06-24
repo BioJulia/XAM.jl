@@ -41,7 +41,7 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
         co.actions[:enter] = [:pos1]
         co.actions[:exit]  = [:metainfo_tag]
 
-        comment = re"[^\r\n]*"
+        comment = re"[^\r\n]*" # Note: Only single line comments are allowed.
         comment.actions[:enter] = [:pos1]
         comment.actions[:exit]  = [:metainfo_val]
 
