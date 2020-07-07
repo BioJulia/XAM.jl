@@ -261,7 +261,7 @@ end
 Test if the mate/next read of `record` is mapped.
 """
 function isnextmapped(record::Record)::Bool
-    return isfilled(record) && (flag(record) & FLAG_MUNMAP == 0)
+    return isfilled(record) && (flag(record) & SAM.FLAG_MUNMAP == 0)
 end
 
 """
