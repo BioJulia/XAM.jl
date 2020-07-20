@@ -28,9 +28,16 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
             key.actions[:enter] = [:pos2]
             key.actions[:exit]  = [:metainfo_dict_key]
             val = re"[ -~]+"
-            val.actions[:enter] = [:pos2]
-            val.actions[:exit]  = [:metainfo_dict_val]
-            keyval = cat(key, ':', val)
+            
+            # val.actions[:enter] = [:pos2]
+            # val.actions[:exit]  = [:metainfo_dict_val]
+            # keyval = cat(key, ':', val)
+
+            separator = re":"
+            separator.actions[:exit] = [:pos2]
+
+            keyval = cat(key, separator, opt(val))
+            keyval.actions[:exit]  = [:metainfo_dict_val]
 
             cat(keyval, rep(cat('\t', keyval)))
         end

@@ -30,6 +30,19 @@
         @test metainfo["VN"] == "1.0"
         @test metainfo["SO"] == "coordinate"
         @test_throws KeyError metainfo["GO"]
+
+
+        metainfo = SAM.MetaInfo("@PG	ID:hisat2	PN:hisat2	VN:	CL:\"/script.sh\"")
+        @test haskey(metainfo, "ID")
+        @test haskey(metainfo, "PN")
+        # @test haskey(metainfo, "VN")
+        @test haskey(metainfo, "CL")
+
+        @test metainfo["ID"] == "hisat2"
+        @test metainfo["PN"] == "hisat2"
+        # @test metainfo["VN"] == ""
+        @test metainfo["CL"] == "\"/script.sh\""
+
     end
 
     @testset "Header" begin
