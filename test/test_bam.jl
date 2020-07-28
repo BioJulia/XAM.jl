@@ -104,9 +104,12 @@
             unsafe_copyto!(array, BAM.FIXED_FIELDS_BYTES + 1, record.data, 1, dsize)
         end
         new_record = convert(BAM.Record, array)
-        @test record.bin_mq_nl == new_record.bin_mq_nl
+        @test record.l_read_name == new_record.l_read_name
+        @test record.mapq == new_record.mapq
+        @test record.bin == new_record.bin
         @test record.block_size == new_record.block_size
-        @test record.flag_nc == new_record.flag_nc
+        @test record.flag == new_record.flag
+        @test record.n_cigar_op == new_record.n_cigar_op
         @test record.l_seq == new_record.l_seq
         @test record.next_refid == new_record.next_refid
         @test record.next_pos == new_record.next_pos
@@ -162,18 +165,21 @@
         if length(xs) != length(ys)
             return false
         end
-        for (x, y) in zip(xs, ys)
+        for (a, b) in zip(xs, ys)
             if !(
-                x.block_size == y.block_size &&
-                x.refid      == y.refid &&
-                x.pos        == y.pos &&
-                x.bin_mq_nl  == y.bin_mq_nl &&
-                x.flag_nc    == y.flag_nc &&
-                x.l_seq      == y.l_seq &&
-                x.next_refid == y.next_refid &&
-                x.next_pos   == y.next_pos &&
-                x.tlen       == y.tlen &&
-                x.data[1:BAM.data_size(x)] == y.data[1:BAM.data_size(y)])
+		        a.block_size    == b.block_size &&
+		        a.refid         == b.refid &&
+		        a.pos           == b.pos &&
+		        a.l_read_name   == b.l_read_name &&
+		        a.mapq          == b.mapq &&
+		        a.bin           == b.bin &&
+		        a.n_cigar_op    == b.n_cigar_op &&
+		        a.flag          == b.flag &&
+		        a.l_seq         == b.l_seq &&
+		        a.next_refid    == b.next_refid &&
+		        a.next_pos      == b.next_pos &&
+		        a.tlen          == b.tlen &&
+                a.data[1:BAM.data_size(a)] == b.data[1:BAM.data_size(b)])
                 return false
             end
         end
