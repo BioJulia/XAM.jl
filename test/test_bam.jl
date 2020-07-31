@@ -58,12 +58,10 @@
         @test ! BAM.ispositivestrand(record)
         @test BAM.refname(record) == "CHROMOSOME_I"
         @test BAM.refid(record) === 1
-        @test BAM.hasnextrefid(record)
-        @test BAM.nextrefid(record) === 0
+        @test ! BAM.hasnextrefid(record)
         @test BAM.hasposition(record) === hasleftposition(record) === true
         @test BAM.position(record) === leftposition(record) === 2
-        @test BAM.hasnextposition(record)
-        @test BAM.nextposition(record) === 0
+        @test ! BAM.hasnextposition(record)
         @test rightposition(record) == 102
         @test BAM.hastempname(record) === hasseqname(record) === true
         @test BAM.tempname(record) == seqname(record) == "SRR065390.14978392"
