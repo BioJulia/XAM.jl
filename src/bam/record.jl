@@ -11,18 +11,21 @@ mutable struct Record
     block_size::Int32
     refid::Int32
     pos::Int32
-    bin_mq_nl::UInt32
-    flag_nc::UInt32
+    l_read_name::UInt8
+    mapq::UInt8
+    bin::UInt16
+    n_cigar_op::UInt16
+    flag::UInt16
     l_seq::Int32
     next_refid::Int32
     next_pos::Int32
     tlen::Int32
     # variable length data
     data::Vector{UInt8}
-    reader::Reader
+    reader::Union{Reader, Nothing}
 
     function Record()
-        return new(0, 0, 0, 0, 0, 0, 0, 0, 0, UInt8[])
+        return new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, UInt8[])
     end
 end
 
@@ -49,8 +52,11 @@ function Base.:(==)(a::Record, b::Record)
     return a.block_size == b.block_size &&
         a.refid         == b.refid &&
         a.pos           == b.pos &&
-        a.bin_mq_nl     == b.bin_mq_nl &&
-        a.flag_nc       == b.flag_nc &&
+        a.l_read_name   == b.l_read_name &&
+        a.mapq          == b.mapq &&
+        a.bin           == b.bin &&
+        a.n_cigar_op    == b.n_cigar_op &&
+        a.flag          == b.flag &&
         a.l_seq         == b.l_seq &&
         a.next_refid    == b.next_refid &&
         a.next_pos      == b.next_pos &&
@@ -60,19 +66,13 @@ end
 
 function Base.copy(record::Record)
     copy = Record()
-    copy.block_size = record.block_size
-    copy.refid      = record.refid
-    copy.pos        = record.pos
-    copy.bin_mq_nl  = record.bin_mq_nl
-    copy.flag_nc    = record.flag_nc
-    copy.l_seq      = record.l_seq
-    copy.next_refid = record.next_refid
-    copy.next_pos   = record.next_pos
-    copy.tlen       = record.tlen
-    copy.data       = record.data[1:data_size(record)]
-    if isdefined(record, :reader)
-        copy.reader = record.reader
+    GC.@preserve copy record begin
+    	dst_pointer = Ptr{UInt8}(pointer_from_objref(copy))
+    	src_pointer = Ptr{UInt8}(pointer_from_objref(record))
+    	unsafe_copyto!(dst_pointer, src_pointer, FIXED_FIELDS_BYTES)
     end
+    copy.data       = record.data[1:data_size(record)]
+    copy.reader     = record.reader
     return copy
 end
 
@@ -80,8 +80,11 @@ function Base.empty!(record::Record)
     record.block_size = 0
     record.refid      = 0
     record.pos        = 0
-    record.bin_mq_nl  = 0
-    record.flag_nc    = 0
+    record.l_read_name = 0
+    record.mapq = 0
+    record.bin = 0
+    record.flag = 0
+    record.n_cigar_op = 0
     record.l_seq      = 0
     record.next_refid = 0
     record.next_pos   = 0
@@ -132,7 +135,7 @@ Get the bitwise flag of `record`.
 """
 function flag(record::Record)::UInt16
     checkfilled(record)
-    return UInt16(record.flag_nc >> 16)
+    return record.flag
 end
 
 function hasflag(record::Record)
@@ -318,7 +321,7 @@ end
 Get the mapping quality of `record`.
 """
 function mappingquality(record::Record)::UInt8
-    return UInt8((record.bin_mq_nl >> 8) & 0xff)
+    return record.mapq
 end
 
 function hasmappingquality(record::Record)
@@ -397,7 +400,7 @@ function extract_cigar_rle(data::Vector{UInt8}, offset, n)
 end
 
 function cigar_position(record::Record, checkCG::Bool = true)::Tuple{Int, Int}
-    cigaridx, nops = seqname_length(record) + 1, record.flag_nc & 0xFFFF
+    cigaridx, nops = seqname_length(record) + 1, record.n_cigar_op
     if !checkCG
         return cigaridx, nops
     end
@@ -661,5 +664,5 @@ end
 
 # Return the length of the read name.
 function seqname_length(record::Record)
-    return record.bin_mq_nl & 0xff
+    return record.l_read_name
 end
