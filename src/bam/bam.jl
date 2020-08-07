@@ -15,7 +15,7 @@ import BioGenerics: isfilled, header
 
 import GenomicFeatures: eachoverlap
 
-
+include("../common.jl")
 include("bai.jl")
 include("auxdata.jl")
 include("reader.jl")

@@ -100,6 +100,48 @@ function Base.empty!(record::Record)
     return record
 end
 
+_show(io, val) = val === nothing ? print(io, "") : show(io, val)
+
+function Base.show(io::IO, record::Record)
+    println(io, summary(record), ':')
+    print(io,   "      template name: "); _show(io, tempname(record))
+    print(io, "\n               flag: "); show(io, flag(record))
+    print(io, "\n       reference ID: "); _show(io, refid(record))
+    print(io, "\n           position: "); _show(io, position(record))
+    print(io, "\n    mapping quality: "); _show(io, mappingquality(record))
+    print(io, "\n              CIGAR: "); _show(io, cigar(record))
+    print(io, "\n  next reference ID: "); _show(io, nextrefid(record))
+    print(io, "\n      next position: "); _show(io, nextposition(record))
+    print(io, "\n    template length: "); _show(io, templength(record))
+    # Sequence and base quality
+    seq = sequence(record)
+    width = displaysize()[2] - 21 # 21 chars used leftwards
+    if seq === nothing
+        print(io, "\n           sequence: "); print(io,  "")
+        print(io, "\n       base quality: "); print(io, "")
+    elseif length(seq) <= width
+        print(io, "\n           sequence: "); show(io,  seq)
+        print(io, "\n       base quality: "); print(io, quality_string(quality(record)))
+    else
+        half = div(width, 2) - 1
+        print(io, "\n           sequence: ", seq[1:half], '…', seq[end-half:end])
+        qual = quality(record)
+        print(io, "\n       base quality: ", quality_string(qual[1:half]), '…',
+                  quality_string(qual[end-half:end]))
+    end
+    # Auxiliary fields - don't show if too long
+    print(io, "\n     auxiliary data:")
+    n_aux_bytes = data_size(record) - auxdata_position(record) + 1
+    if n_aux_bytes > 500
+        print(io, "<", n_aux_bytes, " bytes auxiliary data>")
+    else
+        for field in keys(auxdata(record))
+            print(io, ' ', field, '='); show(record[field])
+        end
+    end
+end
+
+#=
 function Base.show(io::IO, record::Record)
     print(io, summary(record), ':')
     println(io)
@@ -120,6 +162,7 @@ function Base.show(io::IO, record::Record)
         print(io, ' ', field, '=', record[field])
     end
 end
+=#
 
 function Base.read!(reader::Reader, record::Record)
     return _read!(reader, record)
@@ -312,6 +355,10 @@ function hasmappingquality(record::Record)
     return record.mapq < 0xff
 end
 
+function hascigar(record::Record)
+    return record.n_cigar_op > 0
+end
+
 """
     n_cigar_op(record::Record, checkCG::Bool = true)
 
@@ -342,7 +389,8 @@ If you have a record that stores the true cigar in a `CG:B,I` tag, but you still
 
 See also `BAM.cigar_rle`.
 """
-function cigar(record::Record, checkCG::Bool = true)::String
+function cigar(record::Record, checkCG::Bool = true)
+    hascigar(record) || return nothing
     buf = IOBuffer()
     for (op, len) in zip(cigar_rle(record, checkCG)...)
         print(buf, len, convert(Char, op))
@@ -483,15 +531,15 @@ end
 """
     templength(record::Record)::Int
 
-Get the template length of `record`.
+Get the template length of `record`. Always returns a positive number.
 """
 function templength(record::Record)
     hastemplength(record) || return nothing
-    return record.tlen
+    return abs(record.tlen)
 end
 
 function hastemplength(record::Record)
-    return record.tlen > 0
+    return record.tlen != 0
 end
 
 """
