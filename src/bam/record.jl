@@ -124,6 +124,9 @@ end
 
 # Accessor Fuctions
 # -----------------
+function bam_field_error(symbol)
+    throw(ArgumentError("BAM record missing field $symbol"))
+end
 
 """
     flag(record::Record)::UInt16
@@ -131,7 +134,7 @@ end
 Get the bitwise flag of `record`.
 """
 function flag(record::Record)::UInt16
-    checkfilled(record)
+    hasflag(record) || bam_field_error(:flag) 
     return UInt16(record.flag_nc >> 16)
 end
 
@@ -145,6 +148,7 @@ end
 Test if `record` is mapped.
 """
 function ismapped(record::Record)::Bool
+    checkfilled(record)
     return flag(record) & SAM.FLAG_UNMAP == 0
 end
 
@@ -156,6 +160,7 @@ Test if `record` is a primary line of the read.
 This is equivalent to `flag(record) & 0x900 == 0`.
 """
 function isprimary(record::Record)::Bool
+    checkfilled(record)
     return flag(record) & 0x900 == 0
 end
 
@@ -167,6 +172,7 @@ Test if `record` is aligned to the positive strand.
 This is equivalent to `flag(record) & 0x10 == 0`.
 """
 function ispositivestrand(record::Record)::Bool
+    checkfilled(record)
     flag(record) & 0x10 == 0
 end
 
@@ -180,12 +186,12 @@ The ID is 1-based (i.e. the first sequence is 1) and is 0 for a record without a
 See also: `BAM.rname`
 """
 function refid(record::Record)::Int
-    checkfilled(record)
+    hasrefid(record) || bam_field_error(:refid)
     return record.refid + 1
 end
 
 function hasrefid(record::Record)
-    return isfilled(record)
+    return isfilled(record) && record.refid > -1
 end
 
 function checked_refid(record::Record)
@@ -207,7 +213,7 @@ Get the reference sequence name of `record`.
 See also: `BAM.refid`
 """
 function refname(record::Record)::String
-    checkfilled(record)
+    hasrefname(record) || bam_field_error(:refname)
     id = checked_refid(record)
     return record.reader.refseqnames[id]
 end
@@ -218,7 +224,7 @@ end
 Get the length of the reference sequence this record applies to.
 """
 function reflen(record::Record)::Int
-    checkfilled(record)
+    hasrefid(record) || bam_field_error(:refid)
     id = checked_refid(record)
     return record.reader.refseqlens[id]
 end
@@ -233,12 +239,11 @@ end
 Get the 1-based leftmost mapping position of `record`.
 """
 function position(record::Record)::Int
-    checkfilled(record)
     return record.pos + 1
 end
 
 function hasposition(record::Record)
-    return isfilled(record)
+    return isfilled(record) && record.pos > -1
 end
 
 """
@@ -247,12 +252,12 @@ end
 Get the 1-based rightmost mapping position of `record`.
 """
 function rightposition(record::Record)::Int
-    checkfilled(record)
+    hasrightposition(record) || bam_field_error(:rightposition)
     return Int32(position(record) + alignlength(record) - 1)
 end
 
 function hasrightposition(record::Record)
-    return isfilled(record) && ismapped(record)
+    return hasposition(record)
 end
 
 """
@@ -261,7 +266,8 @@ end
 Test if the mate/next read of `record` is mapped.
 """
 function isnextmapped(record::Record)::Bool
-    return isfilled(record) && (flag(record) & SAM.FLAG_MUNMAP == 0)
+    checkfilled(record)
+    return flag(record) & SAM.FLAG_MUNMAP == 0
 end
 
 """
@@ -270,12 +276,18 @@ end
 Get the next/mate reference sequence ID of `record`.
 """
 function nextrefid(record::Record)::Int
-    checkfilled(record)
+    hasnextrefid(record) || bam_field_error(:nextrefid)
     return record.next_refid + 1
 end
 
 function hasnextrefid(record::Record)
-    return isfilled(record)
+    isfilled(record) || return false
+    id = record.next_refid
+    if id < 0
+        return false
+    elseif !isdefined(record, :reader)
+        return false
+    end
 end
 
 """
@@ -284,18 +296,12 @@ end
 Get the reference name of the mate/next read of `record`.
 """
 function nextrefname(record::Record)::String
-    checkfilled(record)
-    id = nextrefid(record)
-    if id == 0
-        throw(ArgumentError("next record is not mapped"))
-    elseif !isdefined(record, :reader)
-        throw(ArgumentError("reader is not defined"))
-    end
+    hasnextrefid(record) || bam_field_error(:nextrefname)
     return record.reader.refseqnames[id]
 end
 
 function hasnextrefname(record::Record)
-    return isfilled(record) && isnextmapped(record)
+    return hasnextrefid(record)
 end
 
 """
@@ -304,12 +310,12 @@ end
 Get the 1-based leftmost mapping position of the next/mate read of `record`.
 """
 function nextposition(record::Record)::Int
-    checkfilled(record)
+    hasnextposition(record) || bam_field_error(:nextposition)
     return record.next_pos + 1
 end
 
 function hasnextposition(record::Record)
-    return isfilled(record)
+    return isfilled(record) && record.next_pos > -1
 end
 
 """
@@ -318,11 +324,12 @@ end
 Get the mapping quality of `record`.
 """
 function mappingquality(record::Record)::UInt8
+    hasmappingquality(record) || bam_field_error(:mappingquality)
     return UInt8((record.bin_mq_nl >> 8) & 0xff)
 end
 
 function hasmappingquality(record::Record)
-    return isfilled(record)
+    return isfilled(record) && UInt8((record.bin_mq_nl >> 8) & 0xff) != 0xff
 end
 
 """
@@ -551,11 +558,13 @@ function quality(record::Record)::Vector{UInt8}
     checkfilled(record)
     seqlen = seqlength(record)
     offset = seqname_length(record) + n_cigar_op(record, false) * 4 + cld(seqlen, 2)
-    return [reinterpret(Int8, record.data[i+offset]) for i in 1:seqlen]
+    return [reinterpret(UInt8, record.data[i+offset]) for i in 1:seqlen]
 end
 
 function hasquality(record::Record)
-    return isfilled(record)
+    seqlen = seqlength(record)
+    offset = seqname_length(record) + n_cigar_op(record, false) * 4 + cld(seqlen, 2)
+    return any(i != 0xff for i in record.data[offset+1 : offset+seqlen])
 end
 
 """
@@ -569,7 +578,7 @@ function auxdata(record::Record)
 end
 
 function hasauxdata(record::Record)
-    return isfilled(record)
+    return isfilled(record) && auxdata_position(record) < data_size(record)
 end
 
 function Base.getindex(record::Record, tag::AbstractString)
