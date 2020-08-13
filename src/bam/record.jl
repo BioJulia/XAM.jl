@@ -511,9 +511,12 @@ end
 
 Get the segment sequence of `record`.
 """
-function sequence(record::Record)::BioSequences.LongDNASeq
+function sequence(record::Record)
     checkfilled(record)
     seqlen = seqlength(record)
+    if seqlen == 0
+        return nothing
+    end
     data = Vector{UInt64}(undef, cld(seqlen, 16))
     src::Ptr{UInt64} = pointer(record.data, seqname_length(record) + n_cigar_op(record, false) * 4 + 1)
     for i in 1:lastindex(data)
