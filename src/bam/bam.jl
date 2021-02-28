@@ -6,8 +6,8 @@ module BAM
 using BioGenerics
 using GenomicFeatures
 using XAM.SAM
+using CodecBGZF
 
-import BGZFStreams
 import BioAlignments
 import Indexes
 import BioSequences

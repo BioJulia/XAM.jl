@@ -2,7 +2,7 @@
 # ==========
 
 """
-    BAM.Writer(output::BGZFStream, header::SAM.Header)
+    BAM.Writer(output::BGZFCompressorStream, header::SAM.Header)
 
 Create a data writer of the BAM file format.
 
@@ -11,10 +11,10 @@ Create a data writer of the BAM file format.
 * `header`: SAM header object
 """
 mutable struct Writer <: BioGenerics.IO.AbstractWriter
-    stream::BGZFStreams.BGZFStream
+    stream::BGZFCompressorStream
 end
 
-function Writer(stream::BGZFStreams.BGZFStream, header::SAM.Header)
+function Writer(stream::BGZFCompressorStream, header::SAM.Header)
     refseqnames = String[]
     refseqlens = Int[]
     for metainfo in findall(header, "SQ")

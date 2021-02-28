@@ -206,9 +206,9 @@ Get the 1-based leftmost mapping position of `record`.
 function position(record::Record)::Int
     checkfilled(record)
     pos = unsafe_parse_decimal(Int, record.data, record.pos)
-    if pos == 0
-        missingerror(:position)
-    end
+    # if pos == 0
+    #     missingerror(:position)
+    # end
     return pos
 end
 
@@ -263,9 +263,9 @@ Get the position of the mate/next read of `record`.
 function nextposition(record::Record)::Int
     checkfilled(record)
     pos = unsafe_parse_decimal(Int, record.data, record.pnext)
-    if pos == 0
-        missingerror(:nextposition)
-    end
+    # if pos == 0
+    #     missingerror(:nextposition)
+    # end
     return pos
 end
 
@@ -299,7 +299,8 @@ Get the CIGAR string of `record`.
 function cigar(record::Record)::String
     checkfilled(record)
     if ismissing(record, record.cigar)
-        missingerror(:cigar)
+        # missingerror(:cigar)
+        return ""
     end
     return String(record.data[record.cigar])
 end
@@ -377,9 +378,9 @@ Get the template length of `record`.
 function templength(record::Record)::Int
     checkfilled(record)
     len = unsafe_parse_decimal(Int, record.data, record.tlen)
-    if len == 0
-        missingerror(:tlen)
-    end
+    # if len == 0
+    #     missingerror(:tlen)
+    # end
     return len
 end
 
@@ -392,10 +393,11 @@ end
 
 Get the segment sequence of `record`.
 """
-function sequence(record::Record)::BioSequences.LongDNASeq
+function sequence(record::Record)
     checkfilled(record)
     if ismissing(record, record.seq)
-        missingerror(:sequence)
+        # missingerror(:sequence)
+        return nothing
     end
     seqlen = length(record.seq)
     ret = BioSequences.LongDNASeq(seqlen)

@@ -550,6 +550,9 @@ Get the segment sequence of `record`.
 function sequence(record::Record)
     hassequence(record) || return nothing
     seqlen = seqlength(record)
+    if seqlen == 0
+        return nothing
+    end
     data = Vector{UInt64}(undef, cld(seqlen, 16))
     index = seqname_length(record) + 1 + n_cigar_op(record, false) * 4 + 1
     src::Ptr{UInt64} = pointer(record.data, index)
