@@ -4,9 +4,9 @@ using BioGenerics
 using FormatSpecimens
 using GenomicFeatures
 using XAM
+using CodecBGZF
 
 import BioAlignments: Alignment, AlignmentAnchor, OP_START, OP_MATCH, OP_DELETE
-import BGZFStreams: BGZFStream
 import BioGenerics.Exceptions: MissingFieldException
 import BioSequences: @dna_str, @aa_str
 
