@@ -308,7 +308,7 @@ function nextrefid(record::Record)
     return Int(record.next_refid + 1)
 end
 
-function hasnextrefid(record::Record)
+function hasnextrefid(record::Record)::Bool
     return record.next_refid > -1
 end
 
@@ -317,13 +317,13 @@ end
 
 Get the reference name of the mate/next read of `record`.
 """
-function nextrefname(record::Record)
+function nextrefname(record::Record)::Union{Nothing, String}
     hasnextrefname(record) || return nothing
     id = record.next_refid
     return record.reader.refseqnames[id]
 end
 
-function hasnextrefname(record::Record)
+function hasnextrefname(record::Record)::Bool
     return (record.next_refid > -1) & (record.reader !== nothing)
 end
 
@@ -332,12 +332,12 @@ end
 
 Get the 1-based leftmost mapping position of the next/mate read of `record`.
 """
-function nextposition(record::Record)
+function nextposition(record::Record)::Union{Int, Nothing}
     hasnextposition(record) || return nothing
     return record.next_pos + 1
 end
 
-function hasnextposition(record::Record)
+function hasnextposition(record::Record)::Bool
     return record.next_pos > -1
 end
 
@@ -615,10 +615,11 @@ end
 """
     auxdata(record::Record)::BAM.AuxData
 
-Get the auxiliary data of `record`.
+Get the auxiliary data of `record`. Note that this object will be corrupted if
+the record is overwritten.
 """
 function auxdata(record::Record)
-    return AuxData(record.data[auxdata_position(record):data_size(record)])
+    return AuxData(@view record.data[auxdata_position(record):data_size(record)])
 end
 
 function hasauxdata(record::Record)
