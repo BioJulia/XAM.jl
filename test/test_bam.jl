@@ -44,7 +44,6 @@
         reader = open(BAM.Reader, joinpath(bamdir, "ce#1.bam"))
         @test isa(reader, BAM.Reader)
         @test eltype(reader) === BAM.Record
-        @test startswith(repr(reader), "XAM.BAM.Reader{IOStream}:")
 
         # header
         h = header(reader)
@@ -199,7 +198,8 @@
 
                 header_original = header(reader)
 
-                writer = BAM.Writer(BGZFStream(path, "w"), BAM.header(reader, fillSQ=isempty(findall(header(reader), "SQ"))))
+				hdr = BAM.header(reader, fillSQ=isempty(findall(header(reader), "SQ")))
+                writer = BAM.Writer(BGZFCompressorStream(open(path, "w")), hdr)
 
                 records = BAM.Record[]
                 for record in reader
