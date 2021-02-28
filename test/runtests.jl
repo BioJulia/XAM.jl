@@ -25,4 +25,6 @@ end
 
 include("test_sam.jl")
 include("test_bam.jl")
-include("test_crosscheck.jl")
+
+# TODO: Properties are internal - rely on functions. But do make integration tests
+#include("test_crosscheck.jl")
