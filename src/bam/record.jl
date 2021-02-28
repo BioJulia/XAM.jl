@@ -583,17 +583,29 @@ function hasseqlength(record::Record)
 end
 
 """
-    quality(record::Record)
+    quality(record::Record)::Union{nothing, Vector{UInt8}}
 
 Get the base quality of `record`.
 """
 function quality(record::Record)
+    it = quality_iter(record)
+    return it === nothing ? it : collect(it)
+end
+
+"""
+    quality_iter(record::Record)
+
+If the quality is not available, return `nothing`. Else, return an iterator
+over the quality values.
+"""
+function quality_iter(record::Record)
     hasseqlength(record) || return nothing
     seqlen = seqlength(record)
     offset = seqname_length(record) + 1 + n_cigar_op(record, false) * 4 + cld(seqlen, 2)
-    quals = record.data[(1+offset):(seqlen+offset)]
-    all(i == 0xff for i in quals) && return nothing
-    return quals
+    data = record.data
+    range = offset+1:offset+seqlen
+    all(data[i] == 0xff for i in range) && return nothing
+    return (data[i] for i in range)
 end
 
 function hasquality(record::Record)
