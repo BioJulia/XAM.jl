@@ -1,7 +1,7 @@
 name = "XAM"
 uuid = "d759349c-bcba-11e9-07c2-5b90f8f05f7c"
 authors = ["Kenta Sato <bicycle1885@gmail.com>", "Ben J. Ward <ward9250@gmail.com>", "Ciarán O'Mara <Ciaran.OMara@utas.edu.au>"]
-version = "0.2.6"
+version = "0.2.7"
 
 [deps]
 Automa = "67c07d97-cdcb-5c2c-af73-a7f9c32a568b"
@@ -15,7 +15,7 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 TranscodingStreams = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 
 [compat]
-Automa = "0.7, 0.8"
+Automa = "0.7 - 0.8.0"
 BGZFStreams = "0.3"
 BioAlignments = "2"
 BioGenerics = "0.1"
