@@ -63,7 +63,10 @@ function Base.iterate(iter::OverlapIterator, state)
     while state.chunkid ≤ lastindex(state.chunks)
         chunk = state.chunks[state.chunkid]
         while VirtualOffset(iter.reader.stream) < chunk.stop
-            read!(iter.reader, state.record)
+            if BioGenerics.IO.tryread!(iter.reader, state.record) === nothing
+                # no more overlapping records in this chunk since the end of the chunk was reached.
+                break
+            end
             c = compare_intervals(state.record, (state.refindex, iter.interval))
             if c == 0
                 return copy(state.record), state
