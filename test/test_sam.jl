@@ -194,5 +194,11 @@
 
         close(reader)
 
+        # Test blank file.
+        file_sam = joinpath(samdir, "xx#blank.sam")
+
+        records = open(collect, SAM.Reader, file_sam)
+        @test records == []
+        
     end
 end

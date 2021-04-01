@@ -94,17 +94,21 @@ end
 Read a `Record` into `rec`; overwriting or adding to existing field values.
 It is assumed that `rec` is already initialized or empty.
 """
-function Base.read!(rdr::Reader, rec::Record)
+function Base.read!(rdr::Reader, record::Record)
 
-    cs, ln, f = readrecord!(rdr.state.stream, rec, (rdr.state.state, rdr.state.linenum))
+    cs, ln, found = readrecord!(rdr.state.stream, record, (rdr.state.state, rdr.state.linenum))
 
     rdr.state.state = cs
     rdr.state.linenum = ln
-    rdr.state.filled = f
+    rdr.state.filled = found
 
-    if !f
-        cs == 0 && throw(EOFError())
-        throw(ArgumentError("malformed SAM file"))
+    if found
+        return record
     end
-    return rec
+
+    if cs == 0 || eof(rdr.state.stream)
+        throw(EOFError())
+    end
+
+    throw(ArgumentError("malformed SAM file"))
 end
