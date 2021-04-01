@@ -134,11 +134,10 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
         cat(re"\r?", lf)
     end
 
-    header′ = rep(cat(metainfo, newline))
-    header′.actions[:exit] = [:header]
-    header = cat(header′, opt(any() \ cat('@')))  # look ahead
+    header = rep(cat(metainfo, newline))
+    header.actions[:exit] = [:header]
 
-    body = rep(cat(record, newline))
+    body = record * rep(newline * record) * opt(newline)
     body.actions[:exit]  = [:body]
 
     sam = cat(header, body)
@@ -199,10 +198,6 @@ const sam_actions_header = merge(
         :header => quote
 
             finish_header = true
-
-            if !eof(stream)
-                p -= 1 # cancel look-ahead
-            end
 
             @escape
         end
@@ -307,10 +302,6 @@ Automa.Stream.generate_reader(
 ) |> eval
 
 const sam_loopcode_header = quote
-
-    if cs < 0
-        throw(ArgumentError("malformed metainfo at line $(linenum)"))
-    end
 
     if finish_header
         @goto __return__
