@@ -26,3 +26,4 @@ end
 include("test_sam.jl")
 include("test_bam.jl")
 include("test_crosscheck.jl")
+include("test_issues.jl")
