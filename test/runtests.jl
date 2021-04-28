@@ -1,4 +1,5 @@
 using Test
+using Documenter
 
 using BioGenerics
 using FormatSpecimens
@@ -23,6 +24,12 @@ function randrange(range)
 end
 
 
-include("test_sam.jl")
-include("test_bam.jl")
-include("test_crosscheck.jl")
+@testset "XAM" begin
+    include("test_sam.jl")
+    include("test_bam.jl")
+    include("test_crosscheck.jl")
+
+    # Include doctests.
+    DocMeta.setdocmeta!(XAM, :DocTestSetup, :(using XAM); recursive=true)
+    doctest(XAM; manual = false)
+end
