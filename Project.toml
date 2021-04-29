@@ -21,7 +21,7 @@ BioAlignments = "2"
 BioGenerics = "0.1"
 BioSequences = "2.0.4"
 GenomicFeatures = "2"
-Indexes = "0.1"
+Indexes = "0.1, 0.2"
 TranscodingStreams = "0.6, 0.7, 0.8, 0.9"
 julia = "1"
 
