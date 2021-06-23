@@ -89,7 +89,7 @@ function compare_intervals(record::Record, interval::Tuple{Int,UnitRange{Int}})
         return -1
     end
 
-    if rid > interval[1] || (rid == interval[1] && position(record) > last(interval[2]))
+    if rid > interval[1] || (rid == interval[1] && leftposition(record) > last(interval[2]))
         # strictly right
         return +1
     end
