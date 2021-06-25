@@ -4,9 +4,9 @@ using BioGenerics
 using FormatSpecimens
 using GenomicFeatures
 using XAM
+using CodecBGZF
 
 import BioAlignments: Alignment, AlignmentAnchor, OP_START, OP_MATCH, OP_DELETE
-import BGZFStreams: BGZFStream
 import BioGenerics.Exceptions: MissingFieldException
 import BioSequences: @dna_str, @aa_str
 
@@ -25,4 +25,6 @@ end
 
 include("test_sam.jl")
 include("test_bam.jl")
-include("test_crosscheck.jl")
+
+# TODO: Properties are internal - rely on functions. But do make integration tests
+#include("test_crosscheck.jl")

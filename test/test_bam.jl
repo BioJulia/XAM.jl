@@ -35,16 +35,29 @@
 
     @testset "Record" begin
         record = BAM.Record()
-        @test !isfilled(record)
-        @test repr(record) == "XAM.BAM.Record: <not filled>"
-        @test_throws ArgumentError BAM.flag(record)
+        @test record == empty!(record)
+        @test BAM.flag(record) == 0x0004
+        @test !BAM.hasrefid(record)
+        @test !BAM.hasrefname(record)
+        @test !BAM.hasposition(record)
+        @test !BAM.hasrightposition(record)
+        @test !BAM.hasnextrefid(record)
+        @test !BAM.hasnextrefname(record)
+        @test !BAM.hasnextposition(record)
+        @test !BAM.hasmappingquality(record)
+        @test !BAM.hasalignment(record)
+        @test !BAM.hastempname(record)
+        @test !BAM.hasseqname(record)
+        @test !BAM.hassequence(record)
+        @test !BAM.hasquality(record)
+        @test !BAM.hasauxdata(record)
+        @test !BAM.hasnextrefid(record)
     end
 
     @testset "Reader" begin
         reader = open(BAM.Reader, joinpath(bamdir, "ce#1.bam"))
         @test isa(reader, BAM.Reader)
         @test eltype(reader) === BAM.Record
-        @test startswith(repr(reader), "XAM.BAM.Reader{IOStream}:")
 
         # header
         h = header(reader)
@@ -58,12 +71,12 @@
         @test ! BAM.ispositivestrand(record)
         @test BAM.refname(record) == "CHROMOSOME_I"
         @test BAM.refid(record) === 1
-        @test BAM.hasnextrefid(record)
-        @test BAM.nextrefid(record) === 0
+        @test !BAM.hasnextrefid(record)
+        @test BAM.nextrefid(record) === nothing
         @test BAM.hasposition(record) === hasleftposition(record) === true
         @test BAM.position(record) === leftposition(record) === 2
-        @test BAM.hasnextposition(record)
-        @test BAM.nextposition(record) === 0
+        @test !BAM.hasnextposition(record)
+        @test BAM.nextposition(record) === nothing
         @test rightposition(record) == 102
         @test BAM.hastempname(record) === hasseqname(record) === true
         @test BAM.tempname(record) == seqname(record) == "SRR065390.14978392"
@@ -199,7 +212,8 @@
 
                 header_original = header(reader)
 
-                writer = BAM.Writer(BGZFStream(path, "w"), BAM.header(reader, fillSQ=isempty(findall(header(reader), "SQ"))))
+				hdr = BAM.header(reader, fillSQ=isempty(findall(header(reader), "SQ")))
+                writer = BAM.Writer(BGZFCompressorStream(open(path, "w")), hdr)
 
                 records = BAM.Record[]
                 for record in reader

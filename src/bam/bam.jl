@@ -6,8 +6,8 @@ module BAM
 using BioGenerics
 using GenomicFeatures
 using XAM.SAM
+using CodecBGZF
 
-import BGZFStreams
 import BioAlignments
 import Indexes
 import BioSequences
@@ -15,7 +15,7 @@ import BioGenerics: isfilled, header
 
 import GenomicFeatures: eachoverlap
 
-
+include("../common.jl")
 include("bai.jl")
 include("auxdata.jl")
 include("reader.jl")

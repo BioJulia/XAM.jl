@@ -1,8 +1,8 @@
 # BAM Auxiliary Data
 # ==================
 
-struct AuxData <: AbstractDict{String,Any}
-    data::Vector{UInt8}
+struct AuxData{T <: AbstractVector{UInt8}} <: AbstractDict{String,Any}
+    data::T
 end
 
 function Base.getindex(aux::AuxData, tag::AbstractString)
@@ -48,7 +48,7 @@ function checkauxtag(tag::AbstractString)
     end
 end
 
-function getauxvalue(data::Vector{UInt8}, start::Int, stop::Int, t1::UInt8, t2::UInt8)
+function getauxvalue(data::AbstractVector{UInt8}, start::Int, stop::Int, t1::UInt8, t2::UInt8)
     pos = findauxtag(data, start, stop, t1, t2)
     if pos == 0
         throw(KeyError(String([t1, t2])))
@@ -58,7 +58,7 @@ function getauxvalue(data::Vector{UInt8}, start::Int, stop::Int, t1::UInt8, t2::
     return val
 end
 
-function loadauxtype(data::Vector{UInt8}, p::Int)
+function loadauxtype(data::AbstractVector{UInt8}, p::Int)
     function auxtype(b)
         return (
             b == UInt8('A') ? Char  :
@@ -83,15 +83,15 @@ function loadauxtype(data::Vector{UInt8}, p::Int)
     
 end
 
-function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{T}) where T
+function loadauxvalue(data::AbstractVector{UInt8}, p::Int, ::Type{T}) where T
     return p + sizeof(T), unsafe_load(Ptr{T}(pointer(data, p)))
 end
 
-function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{Char})
+function loadauxvalue(data::AbstractVector{UInt8}, p::Int, ::Type{Char})
     return p + 1, Char(unsafe_load(pointer(data, p)))
 end
 
-function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{Vector{T}}) where T
+function loadauxvalue(data::AbstractVector{UInt8}, p::Int, ::Type{Vector{T}}) where T
     n = unsafe_load(Ptr{Int32}(pointer(data, p)))
     p += 4
     xs = Vector{T}(undef, n)
@@ -99,14 +99,14 @@ function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{Vector{T}}) where T
     return p + n * sizeof(T), xs
 end
 
-function loadauxvalue(data::Vector{UInt8}, p::Int, ::Type{String})
+function loadauxvalue(data::AbstractVector{UInt8}, p::Int, ::Type{String})
     dataptr = pointer(data, p)
     endptr = ccall(:memchr, Ptr{Cvoid}, (Ptr{Cvoid}, Cint, Csize_t), dataptr, '\0', length(data) - p + 1)
     q::Int = p + (endptr - dataptr) - 1
     return q + 2, String(data[p:q])
 end
 
-function findauxtag(data::Vector{UInt8}, start::Int, stop::Int, t1::UInt8, t2::UInt8)
+function findauxtag(data::AbstractVector{UInt8}, start::Int, stop::Int, t1::UInt8, t2::UInt8)
     pos = start
 
     while pos ≤ stop && !(data[pos] == t1 && data[pos+1] == t2)
@@ -123,7 +123,7 @@ end
 
 # Find the starting position of a next tag in `data` after `p`.
 # `(data[p], data[p+1])` is supposed to be a current tag.
-function next_tag_position(data::Vector{UInt8}, p::Int)
+function next_tag_position(data::AbstractVector{UInt8}, p::Int)
     typ = Char(data[p+2])
     p += 3
 
