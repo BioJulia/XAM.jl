@@ -2,10 +2,11 @@
 # ==========
 
 mutable struct Record
-    # data and filled range
+    # Data and filled range.
     data::Vector{UInt8}
-    filled::UnitRange{Int}
-    # indexes
+    filled::UnitRange{Int} # Note: Specifies the data in use.
+
+    # Mandatory fields.
     qname::UnitRange{Int}
     flag::UnitRange{Int}
     rname::UnitRange{Int}
@@ -17,6 +18,8 @@ mutable struct Record
     tlen::UnitRange{Int}
     seq::UnitRange{Int}
     qual::UnitRange{Int}
+
+    # Auxiliary fields.
     fields::Vector{UnitRange{Int}}
 end
 
