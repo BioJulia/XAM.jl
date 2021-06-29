@@ -199,6 +199,6 @@
 
         records = open(collect, SAM.Reader, file_sam)
         @test records == []
-        
+
     end
 end

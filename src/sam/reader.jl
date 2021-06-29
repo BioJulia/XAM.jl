@@ -10,11 +10,15 @@ function Reader(state::State{S}) where {S <: TranscodingStream}
 
     rdr = Reader(state, Header())
 
-    cs, ln, f = readheader!(rdr.state.stream, rdr.header, (sam_machine_header.start_state, rdr.state.linenum))
+    cs, ln = readheader!(rdr.state.stream, rdr.header, (sam_machine_header.start_state, rdr.state.linenum))
 
     rdr.state.state = sam_machine_body.start_state
     rdr.state.linenum = ln
     rdr.state.filled = false
+
+    if cs != -1 && cs != 0 #Note: the header is finished when the state machine fails to transition after a new line (state 1).
+        throw(ArgumentError("Malformed SAM file header at line $(ln). Machine failed to transition from state $(cs)."))
+    end
 
     return rdr
 end
@@ -65,18 +69,18 @@ end
 
 function index!(record::MetaInfo)
     stream = TranscodingStreams.NoopStream(IOBuffer(record.data))
-    found = index!(stream, record)
-    if !found
-        throw(ArgumentError("invalid SAM metadata"))
+    cs = index!(stream, record)
+    if cs != 0
+        throw(ArgumentError("Invalid SAM metadata. Machine failed to transition from state $(cs)."))
     end
     return record
 end
 
 function index!(record::Record)
     stream = TranscodingStreams.NoopStream(IOBuffer(record.data))
-    found = index!(stream, record)
-    if !found
-        throw(ArgumentError("invalid SAM record"))
+    cs = index!(stream, record)
+    if cs != 0
+        throw(ArgumentError("Invalid SAM record. Machine failed to transition from state $(cs)."))
     end
     return record
 end
@@ -110,5 +114,6 @@ function Base.read!(rdr::Reader, record::Record)
         throw(EOFError())
     end
 
-    throw(ArgumentError("malformed SAM file"))
+    throw(ArgumentError("Malformed SAM file record at line $(ln). Machine failed to transition from state $(cs)."))
+
 end
