@@ -128,11 +128,6 @@ end
 # Accessor Fuctions
 # -----------------
 
-"""
-    flag(record::Record)::UInt16
-
-Get the bitwise flag of `record`.
-"""
 function flag(record::Record)::UInt16
     checkfilled(record)
     return record.flag

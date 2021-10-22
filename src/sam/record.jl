@@ -150,11 +150,6 @@ end
 # Accessor Functions
 # ------------------
 
-"""
-    flag(record::Record)::UInt16
-
-Get the bitwise flag of `record`.
-"""
 function flag(record::Record)::UInt16
     checkfilled(record)
     return unsafe_parse_decimal(UInt16, record.data, record.flag)

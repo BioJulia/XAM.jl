@@ -18,9 +18,13 @@ for (name, bits, doc) in [
         (:SUPPLEMENTARY, UInt16(0x800), "supplementary alignment"                                                   ),]
     @assert bits isa UInt16
     sym = Symbol("FLAG_", name)
-    doc = string(@sprintf("0x%04x: ", bits), doc)
+    docstring = """    $sym
+    SAM/BAM flag: $doc
+
+    See also: [`flag`](@ref)
+    """
     @eval begin
-        @doc $(doc) const $(sym) = $(bits)
+        @doc $(docstring) const $(sym) = $(bits)
     end
 end
 
