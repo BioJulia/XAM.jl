@@ -11,6 +11,7 @@ import BioGenerics.Exceptions: missingerror
 import BioGenerics.Automa: State
 import BioSequences
 import TranscodingStreams: TranscodingStreams, TranscodingStream
+import ..XAM: flag
 
 using Printf: @sprintf
 
