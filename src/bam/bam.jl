@@ -25,4 +25,15 @@ include("record.jl")
 include("writer.jl")
 include("overlap.jl")
 
+"""
+    groupname(record::Record)::String
+
+Alias method to get the reference sequence name of `record`.
+
+See also: `BAM.refname`
+"""
+function BioGenerics.groupname(record::BAM.Record)
+	return refname(record)
+end
+
 end
