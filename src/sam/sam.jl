@@ -56,4 +56,16 @@ include("reader.jl")
 include("readrecord.jl")
 include("writer.jl")
 
+
+"""
+    groupname(record::Record)::String
+
+Alias method to get the reference sequence name of `record`.
+
+See also: `SAM.refname`
+"""
+function BioGenerics.groupname(record::SAM.Record)
+	return refname(record)
+end
+
 end
