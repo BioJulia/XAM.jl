@@ -91,7 +91,7 @@ function Base.empty!(record::Record)
     record.tlen       = 0
 
     #Note: data will be overwritten and indexed using data_size.
-    
+
     return record
 end
 
@@ -505,7 +505,7 @@ function hastemplength(record::Record)
 end
 
 """
-    sequence(record::Record)::BioSequences.LongDNASeq
+    sequence(record::Record)::BioSequences.LongDNA{4}
 
 Get the segment sequence of `record`.
 """
@@ -522,7 +522,7 @@ function sequence(record::Record)
         x = unsafe_load(src, i)
         data[i] = (x & 0x0f0f0f0f0f0f0f0f) << 4 | (x & 0xf0f0f0f0f0f0f0f0) >> 4
     end
-    return BioSequences.LongDNASeq(data, 1:seqlen, false)
+    return BioSequences.LongDNA{4}(data, UInt(seqlen))
 end
 
 function hassequence(record::Record)
