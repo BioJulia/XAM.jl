@@ -38,7 +38,7 @@ function Base.iterate(header::Header, i=1)
 end
 
 """
-    find(header::Header, key::AbstractString)::Vector{MetaInfo}
+    findall(header::Header, key::AbstractString)::Vector{MetaInfo}
 
 Find metainfo objects satisfying `SAM.tag(metainfo) == key`.
 """
