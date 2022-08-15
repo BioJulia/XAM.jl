@@ -63,7 +63,7 @@ end
 function Base.iterate(iter::OverlapIterator, state)
     while state.chunkid ≤ lastindex(state.chunks)
         chunk = state.chunks[state.chunkid]
-        while BGZFStreams.virtualoffset(iter.reader.stream) < chunk.stop
+        while VirtualOffset(iter.reader.stream) < chunk.stop
             read!(iter.reader, state.record)
             c = compare_intervals(state.record, (state.refindex, iter.interval))
             if c == 0  # overlapping

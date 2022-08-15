@@ -4,11 +4,12 @@
 module BAM
 
 using BioGenerics
+using CodecBGZF
 using GenomicFeatures
 using XAM.SAM
+
 import ..XAM: flag
 
-import BGZFStreams
 import BioAlignments
 import Indexes
 import BioSequences
