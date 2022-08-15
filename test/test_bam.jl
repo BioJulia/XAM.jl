@@ -269,7 +269,7 @@
         reader = open(BAM.Reader, filepath, index=filepath * ".bai")
 
         @test isa(eachoverlap(reader, "chr1", 1:100), BAM.OverlapIterator)
-        @test isa(eachoverlap(reader, GenomicFeatures.Interval("chr1", 1, 100)), BAM.OverlapIterator)
+        @test isa(eachoverlap(reader, GenomicFeatures.GenomicInterval("chr1", 1, 100)), BAM.OverlapIterator)
 
         # expected values are counted using samtools
         for (refname, interval, expected) in [
