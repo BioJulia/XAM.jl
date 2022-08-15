@@ -387,7 +387,7 @@ function hastemplength(record::Record)
 end
 
 """
-    sequence(record::Record)::BioSequences.LongDNASeq
+    sequence(record::Record)::BioSequences.LongDNA{4}
 
 Get the segment sequence of `record`.
 """
@@ -398,7 +398,7 @@ function sequence(record::Record)
         return nothing
     end
     seqlen = length(record.seq)
-    ret = BioSequences.LongDNASeq(seqlen)
+    ret = BioSequences.LongDNA{4}(undef, seqlen)
     copyto!(ret, 1, record.data, first(record.seq), seqlen)
     return ret
 end
