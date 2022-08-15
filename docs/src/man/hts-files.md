@@ -220,7 +220,7 @@ close(reader)
 
 ## Getting records overlapping genomic features
 
-The `eachoverlap` method also accepts the `Interval` type defined in [GenomicFeatures.jl](https://github.com/BioJulia/GenomicFeatures.jl).
+The `eachoverlap` method also accepts the `GenomicInterval` type defined in [GenomicFeatures.jl](https://github.com/BioJulia/GenomicFeatures.jl).
 
 This allows you to do things like first read in the genomic features from a GFF3 file, and then for each feature, iterate over all the BAM records that overlap with that feature.
 
