@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded to BioAlignments v3 ([#53](https://github.com/BioJulia/XAM.jl/pull/53))
+
 ## [0.3.0]
 
 ## Added
