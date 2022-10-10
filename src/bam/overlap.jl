@@ -50,12 +50,15 @@ function Base.iterate(iter::OverlapIterator)
     if refindex === nothing
         throw(ArgumentError("sequence name $(iter.refname) is not found in the header"))
     end
-    @assert iter.reader.index !== nothing
+
+    @assert iter.reader.index !== nothing "Reader index cannot be nothing."
+
     chunks = Indexes.overlapchunks(iter.reader.index.index, refindex, iter.interval)
-    if !isempty(chunks)
-        seek(iter.reader, first(chunks).start)
+    if isempty(chunks)
+        return nothing
     end
     state = OverlapIteratorState(refindex, chunks, 1, Record())
+    seek(iter.reader, state.chunks[state.chunkid].start)
     return iterate(iter, state)
 end
 
@@ -65,7 +68,7 @@ function Base.iterate(iter::OverlapIterator, state)
         while BGZFStreams.virtualoffset(iter.reader.stream) < chunk.stop
             read!(iter.reader, state.record)
             c = compare_intervals(state.record, (state.refindex, iter.interval))
-            if c == 0
+            if c == 0  # overlapping
                 return copy(state.record), state
             end
             if c > 0
@@ -78,6 +81,7 @@ function Base.iterate(iter::OverlapIterator, state)
             seek(iter.reader, state.chunks[state.chunkid].start)
         end
     end
+    # no more overlapping records
     return nothing
 end
 
@@ -89,7 +93,7 @@ function compare_intervals(record::Record, interval::Tuple{Int,UnitRange{Int}})
         return -1
     end
 
-    if rid > interval[1] || (rid == interval[1] && position(record) > last(interval[2]))
+    if rid > interval[1] || (rid == interval[1] && leftposition(record) > last(interval[2]))
         # strictly right
         return +1
     end

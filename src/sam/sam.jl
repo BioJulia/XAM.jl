@@ -11,6 +11,7 @@ import BioGenerics.Exceptions: missingerror
 import BioGenerics.Automa: State
 import BioSequences
 import TranscodingStreams: TranscodingStreams, TranscodingStream
+import ..XAM: flag
 
 using Printf: @sprintf
 
@@ -45,20 +46,6 @@ function unsafe_parse_decimal(::Type{T}, data::Vector{UInt8}, range::UnitRange{I
     end
     return sign * x
 end
-
-# #TODO: update BioCore.Ragel.State (will likely change with TrnscodingStreams).
-# import BufferedStreams: BufferedStreams, BufferedInputStream
-# # A type keeping track of a ragel-based parser's state.
-# mutable struct State{T<:BufferedInputStream}
-#     stream::T      # input stream
-#     cs::Int        # current DFA state of Ragel
-#     linenum::Int   # line number: parser is responsible for updating this
-#     finished::Bool # true if finished (regardless of where in the stream we are)
-# end
-
-# function State(initstate::Int, input::BufferedInputStream)
-#     return State(input, initstate, 1, false)
-# end
 
 
 include("flags.jl")

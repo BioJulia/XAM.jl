@@ -41,7 +41,7 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
         co.actions[:enter] = [:pos1]
         co.actions[:exit]  = [:metainfo_tag]
 
-        comment = re"[^\r\n]*"
+        comment = re"[^\r\n]*" # Note: Only single line comments are allowed.
         comment.actions[:enter] = [:pos1]
         comment.actions[:exit]  = [:metainfo_val]
 
@@ -137,7 +137,7 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
     header = rep(cat(metainfo, newline))
     header.actions[:exit] = [:header]
 
-    body = record * rep(newline * record) * opt(newline)
+    body = rep(cat(record, newline))
     body.actions[:exit]  = [:body]
 
     sam = cat(header, body)
@@ -168,13 +168,6 @@ function appendfrom!(dst, dpos, src, spos, n)
     return dst
 end
 
-const action_metainfo = quote
-    appendfrom!(metainfo.data, 1, data, @markpos, p-@markpos)
-    metainfo.filled = 1:(p-@markpos)
-
-    found_metainfo = true
-end
-
 const sam_actions_metainfo = Dict(
     :mark => :(@mark),
     :pos1  => :(pos1 = @relpos(p)),
@@ -183,7 +176,10 @@ const sam_actions_metainfo = Dict(
     :metainfo_val => :(metainfo.val = pos1:@relpos(p-1)),
     :metainfo_dict_key => :(push!(metainfo.dictkey, pos2:@relpos(p-1))),
     :metainfo_dict_val => :(push!(metainfo.dictval, pos2:@relpos(p-1))),
-    :metainfo => action_metainfo
+    :metainfo => quote
+        appendfrom!(metainfo.data, 1, data, @markpos, p-@markpos)
+        metainfo.filled = 1:(p-@markpos)
+    end
 )
 
 const sam_actions_header = merge(
@@ -191,16 +187,11 @@ const sam_actions_header = merge(
     Dict(
         :countline => :(linenum += 1),
         :metainfo => quote
-            $(action_metainfo)
+            $(sam_actions_metainfo[:metainfo])
             push!(header, metainfo)
             metainfo = MetaInfo()
         end,
-        :header => quote
-
-            finish_header = true
-
-            @escape
-        end
+        :header => :(@escape)
     )
 )
 
@@ -222,9 +213,6 @@ const sam_actions_record = Dict(
     :record       => quote
         appendfrom!(record.data, 1, data, @markpos, p-@markpos)
         record.filled = 1:(p-@markpos)
-
-        found_record = true
-        @escape
     end
 )
 
@@ -232,17 +220,14 @@ const sam_actions_body = merge(
     sam_actions_record,
     Dict(
         :countline => :(linenum += 1),
-        :body => quote
-            finish_body = true
+        :record => quote
+            found_record = true
+            $(sam_actions_record[:record])
             @escape
-        end
+        end,
+        :body => :(@escape)
     )
 )
-
-# const sam_actions = merge(
-#     sam_actions_header,
-#     sam_actions_body
-# )
 
 const sam_context = Automa.CodeGenContext(
     generator = :goto,
@@ -253,42 +238,23 @@ const sam_context = Automa.CodeGenContext(
 const sam_initcode_metainfo = quote
     pos1 = 0
     pos2 = 0
-    found_metainfo = false
-end
-
-const sam_initcode_record = quote
-    pos = 0
-    found_record = false
 end
 
 const sam_initcode_header = quote
     $(sam_initcode_metainfo)
     metainfo = MetaInfo()
-    finish_header = false
     cs, linenum = state
+end
+
+const sam_initcode_record = quote
+    pos = 0
 end
 
 const sam_initcode_body = quote
     $(sam_initcode_record)
-    finish_body = false
+    found_record = false
     cs, linenum = state
 end
-
-const sam_loopcode_metainfo = quote
-
-    if cs < 0
-        throw(ArgumentError("malformed metainfo at pos $(p)"))
-    end
-
-    if found_metainfo
-        @goto __return__
-    end
-end
-
-const sam_returncode_metainfo = quote
-    return found_metainfo
-end
-
 
 Automa.Stream.generate_reader(
     :index!,
@@ -297,19 +263,10 @@ Automa.Stream.generate_reader(
     actions = sam_actions_metainfo,
     context = sam_context,
     initcode = sam_initcode_metainfo,
-    loopcode = sam_loopcode_metainfo,
-    returncode = sam_returncode_metainfo
 ) |> eval
 
-const sam_loopcode_header = quote
-
-    if finish_header
-        @goto __return__
-    end
-end
-
 const sam_returncode_header = quote
-    return cs, linenum, finish_header
+    return cs, linenum
 end
 
 Automa.Stream.generate_reader(
@@ -319,38 +276,13 @@ Automa.Stream.generate_reader(
     actions = sam_actions_header,
     context = sam_context,
     initcode = sam_initcode_header,
-    loopcode = sam_loopcode_header,
     returncode = sam_returncode_header
 ) |> eval
 
-
-const sam_loopcode_record = quote
-
-    if cs < 0
-        throw(ArgumentError("malformed SAM record at position $(p), line $(linenum)"))
-    end
-
-    # # if cs != 0
-    # #     throw(ArgumentError(string("failed to index ", $(record_type), " ~>", repr(String(data[p:min(p+7,p_end)])))))
-    # # end
-
+const sam_loopcode_body = quote
     if found_record
         @goto __return__
     end
-
-end
-
-const sam_loopcode_body = quote
-
-    $(sam_loopcode_record)
-
-    if finish_body
-        @goto __return__
-    end
-end
-
-const sam_returncode_record = quote
-    return found_record
 end
 
 Automa.Stream.generate_reader(
@@ -360,10 +292,7 @@ Automa.Stream.generate_reader(
     actions = sam_actions_record,
     context = sam_context,
     initcode = sam_initcode_record,
-    loopcode = sam_loopcode_record,
-    returncode = sam_returncode_record
 ) |> eval
-
 
 
 const sam_returncode_body = quote

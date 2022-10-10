@@ -2,6 +2,8 @@ using Pkg
 using Documenter, XAM
 
 makedocs(
+    checkdocs = :all,
+    linkcheck = true,
     format = Documenter.HTML(
         edit_link = "develop"
     ),

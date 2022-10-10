@@ -2,10 +2,11 @@
 # ==========
 
 mutable struct Record
-    # data and filled range
+    # Data and filled range.
     data::Vector{UInt8}
-    filled::UnitRange{Int}
-    # indexes
+    filled::UnitRange{Int} # Note: Specifies the data in use.
+
+    # Mandatory fields.
     qname::UnitRange{Int}
     flag::UnitRange{Int}
     rname::UnitRange{Int}
@@ -17,6 +18,8 @@ mutable struct Record
     tlen::UnitRange{Int}
     seq::UnitRange{Int}
     qual::UnitRange{Int}
+
+    # Auxiliary fields.
     fields::Vector{UnitRange{Int}}
 end
 
@@ -147,11 +150,6 @@ end
 # Accessor Functions
 # ------------------
 
-"""
-    flag(record::Record)::UInt16
-
-Get the bitwise flag of `record`.
-"""
 function flag(record::Record)::UInt16
     checkfilled(record)
     return unsafe_parse_decimal(UInt16, record.data, record.flag)
@@ -206,9 +204,9 @@ Get the 1-based leftmost mapping position of `record`.
 function position(record::Record)::Int
     checkfilled(record)
     pos = unsafe_parse_decimal(Int, record.data, record.pos)
-    if pos == 0
-        missingerror(:position)
-    end
+    # if pos == 0
+    #     missingerror(:position)
+    # end
     return pos
 end
 
@@ -263,9 +261,9 @@ Get the position of the mate/next read of `record`.
 function nextposition(record::Record)::Int
     checkfilled(record)
     pos = unsafe_parse_decimal(Int, record.data, record.pnext)
-    if pos == 0
-        missingerror(:nextposition)
-    end
+    # if pos == 0
+    #     missingerror(:nextposition)
+    # end
     return pos
 end
 
@@ -299,7 +297,8 @@ Get the CIGAR string of `record`.
 function cigar(record::Record)::String
     checkfilled(record)
     if ismissing(record, record.cigar)
-        missingerror(:cigar)
+        # missingerror(:cigar)
+        return ""
     end
     return String(record.data[record.cigar])
 end
@@ -377,9 +376,9 @@ Get the template length of `record`.
 function templength(record::Record)::Int
     checkfilled(record)
     len = unsafe_parse_decimal(Int, record.data, record.tlen)
-    if len == 0
-        missingerror(:tlen)
-    end
+    # if len == 0
+    #     missingerror(:tlen)
+    # end
     return len
 end
 
@@ -388,17 +387,18 @@ function hastemplength(record::Record)
 end
 
 """
-    sequence(record::Record)::BioSequences.LongDNASeq
+    sequence(record::Record)::BioSequences.LongDNA{4}
 
 Get the segment sequence of `record`.
 """
-function sequence(record::Record)::BioSequences.LongDNASeq
+function sequence(record::Record)
     checkfilled(record)
     if ismissing(record, record.seq)
-        missingerror(:sequence)
+        # missingerror(:sequence)
+        return nothing
     end
     seqlen = length(record.seq)
-    ret = BioSequences.LongDNASeq(seqlen)
+    ret = BioSequences.LongDNA{4}(undef, seqlen)
     copyto!(ret, 1, record.data, first(record.seq), seqlen)
     return ret
 end
@@ -494,7 +494,7 @@ function Base.getindex(record::Record, tag::AbstractString)
     end
 
     if typ == UInt8('A')
-        @assert lo == hi
+        @assert lo == hi "Values lo and hi must be equivalent."
         return Char(record.data[lo])
     end
     if typ == UInt8('i')

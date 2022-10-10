@@ -37,7 +37,7 @@ function Base.write(writer::Writer, record::Record)
 end
 
 function write_header(stream, header, refseqnames, refseqlens)
-    @assert length(refseqnames) == length(refseqlens)
+    @assert length(refseqnames) == length(refseqlens) "Lengths of refseq names and lengths must match."
     n = 0
 
     # magic bytes
