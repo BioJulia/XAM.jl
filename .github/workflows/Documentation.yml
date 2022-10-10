@@ -10,7 +10,9 @@ on:
 
 jobs:
   Documenter:
-    name: Documentation
+    permissions:
+      contents: write
+    name: Documentation    
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
