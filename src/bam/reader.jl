@@ -8,7 +8,7 @@ Create a data reader of the BAM file format.
 
 # Arguments
 * `input`: data source
-* `index=nothing`: filepath to a random access index (currently *bai* is supported)
+* `index=nothing`: filepath to a random access index (currently *bai* is supported) or BAI object 
 """
 mutable struct Reader{T} <: BioGenerics.IO.AbstractReader
     stream::BGZFStreams.BGZFStream{T}
