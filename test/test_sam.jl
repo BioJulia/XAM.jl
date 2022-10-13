@@ -104,10 +104,10 @@
         @test SAM.flag(record) == 16
         @test SAM.cigar(record) == "27M1D73M"
         @test SAM.alignment(record) == Alignment([
-            AlignmentAnchor(  0,   1, OP_START),
-            AlignmentAnchor( 27,  28, OP_MATCH),
-            AlignmentAnchor( 27,  29, OP_DELETE),
-            AlignmentAnchor(100, 102, OP_MATCH)])
+            AlignmentAnchor(  0,   1,   0, OP_START),
+            AlignmentAnchor( 27,  28,  27, OP_MATCH),
+            AlignmentAnchor( 27,  29,  28, OP_DELETE),
+            AlignmentAnchor(100, 102, 101, OP_MATCH)])
         @test record["XG"] == 1
         @test record["XM"] == 5
         @test record["XN"] == 0
