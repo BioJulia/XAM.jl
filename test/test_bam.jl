@@ -241,6 +241,21 @@
 
     end
 
+    @testset "BAI" begin
+
+        filepath = joinpath(bamdir, "GSE25840_GSM424320_GM06985_gencode_spliced.head.bam")
+
+        index = BAM.BAI(filepath * ".bai")
+        reader = open(BAM.Reader, filepath, index=index)
+        
+        @test isa(eachoverlap(reader, "chr1", 1:100), BAM.OverlapIterator)
+
+        close(reader)
+
+        @test_throws ErrorException open(BAM.Reader, filepath, index=1234) 
+
+    end
+
     @testset "Random access" begin
         filepath = joinpath(bamdir, "GSE25840_GSM424320_GM06985_gencode_spliced.head.bam")
         reader = open(BAM.Reader, filepath, index=filepath * ".bai")
