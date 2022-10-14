@@ -506,14 +506,6 @@ function BioGenerics.isfilled(record::Record)
     return !isempty(record.filled)
 end
 
-function BioGenerics.seqname(record::Record)
-    return tempname(record)
-end
-
-function BioGenerics.hasseqname(record::Record)
-    return hastempname(record)
-end
-
 function BioGenerics.sequence(record::Record)
     return sequence(record)
 end

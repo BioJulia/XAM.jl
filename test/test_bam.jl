@@ -65,8 +65,8 @@
         @test BAM.hasnextposition(record)
         @test BAM.nextposition(record) === 0
         @test rightposition(record) == 102
-        @test BAM.hastempname(record) === hasseqname(record) === true
-        @test BAM.tempname(record) == seqname(record) == "SRR065390.14978392"
+        @test BAM.hastempname(record) === true
+        @test BAM.tempname(record) == "SRR065390.14978392"
         @test BAM.hassequence(record) === hassequence(record) === true
         @test BAM.sequence(record) == sequence(record) == dna"""
         CCTAGCCCTAACCCTAACCCTAACCCTAGCCTAAGCCTAAGCCTAAGCCT
@@ -247,12 +247,12 @@
 
         index = BAM.BAI(filepath * ".bai")
         reader = open(BAM.Reader, filepath, index=index)
-        
+
         @test isa(eachoverlap(reader, "chr1", 1:100), BAM.OverlapIterator)
 
         close(reader)
 
-        @test_throws ErrorException open(BAM.Reader, filepath, index=1234) 
+        @test_throws ErrorException open(BAM.Reader, filepath, index=1234)
 
     end
 
