@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added BAM.Reader index support for BAI object ([#56](https://github.com/BioJulia/XAM.jl/pull/56/files))
+
 ## [0.3.1]
 
 ### Changed
