@@ -387,33 +387,42 @@ function hastemplength(record::Record)
 end
 
 """
-    sequence(record::Record)::BioSequences.LongDNA{4}
+    sequence(::Type{S}, record::Record, [part::UnitRange{Int}])::S
 
-Get the segment sequence of `record`.
+Get the sequence of `record`.
+`S` can be either a subtype of `BioSequences.BioSequence` or `String`.
+If `part` argument is given, it returns the specified part of the sequence.
+!!! note
+    This method makes a new sequence object every time.
+    If you have a sequence already and want to fill it with the sequence
+    data contained in a fasta record, you can use `Base.copyto!`.
 """
-function sequence(record::Record)
-    checkfilled(record)
-    if ismissing(record, record.seq)
-        # missingerror(:sequence)
-        return nothing
-    end
-    seqlen = length(record.seq)
-    ret = BioSequences.LongDNA{4}(undef, seqlen)
-    copyto!(ret, 1, record.data, first(record.seq), seqlen)
-    return ret
+function sequence(::Type{S}, record::Record, part::UnitRange{Int}=1:lastindex(record.seq)) where S <: BioSequences.LongSequence
+     checkfilled(record)
+     if ismissing(record, record.seq)
+         # missingerror(:sequence)
+         return nothing
+     end
+     seqpart = record.seq[part]
+     return S(@view(record.data[seqpart]))
+ end
+
+ function sequence(::Type{String}, record::Record, part::UnitRange{Int}=1:lastindex(record.seq))
+     checkfilled(record)
+     return String(record.data[record.seq[part]])
+ end
+
+ """
+     sequence(record::Record)::BioSequences.LongDNA{4}
+
+ Get the segment sequence of `record`.
+ """
+function sequence(record::Record, part::UnitRange{Int}=1:lastindex(record.seq))
+    return sequence(BioSequences.LongDNA{4}, record, part)
 end
 
 function hassequence(record::Record)
     return isfilled(record) && !ismissing(record, record.seq)
-end
-"""
-    sequence(::Type{String}, record::Record)::String
-
-Get the segment sequence of `record` as `String`.
-"""
-function sequence(::Type{String}, record::Record)::String
-    checkfilled(record)
-    return String(record.data[record.seq])
 end
 
 """

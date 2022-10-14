@@ -488,12 +488,7 @@ function hastemplength(record::Record)
     return isfilled(record)
 end
 
-"""
-    sequence(record::Record)::BioSequences.LongDNA{4}
-
-Get the segment sequence of `record`.
-"""
-function sequence(record::Record)
+function sequence(::Type{S}, record::Record) where S <: BioSequences.LongSequence #TODO: add optional part retrieval.
     checkfilled(record)
     seqlen = seqlength(record)
     if seqlen == 0
@@ -506,7 +501,16 @@ function sequence(record::Record)
         x = unsafe_load(src, i)
         data[i] = (x & 0x0f0f0f0f0f0f0f0f) << 4 | (x & 0xf0f0f0f0f0f0f0f0) >> 4
     end
-    return BioSequences.LongDNA{4}(data, UInt(seqlen))
+    return S(data, UInt64(seqlen))
+end
+
+"""
+    sequence(record::Record)::BioSequences.LongDNA{4}
+
+Get the segment sequence of `record`.
+"""
+function sequence(record::Record) #TODO: add optional part retrieval.
+    return sequence(BioSequences.LongDNA{4}, record)
 end
 
 function hassequence(record::Record)
