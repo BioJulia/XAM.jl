@@ -430,27 +430,11 @@ end
 Get the alignment of `record`.
 """
 function alignment(record::Record)::BioAlignments.Alignment
-    checkfilled(record)
-    if !ismapped(record)
-        return BioAlignments.Alignment(BioAlignments.AlignmentAnchor[])
+    if ismapped(record)
+        return BioAlignments.Alignment(cigar(record), 1, position(record))
     end
-    seqpos = 0
-    refpos = position(record) - 1
-    anchors = [BioAlignments.AlignmentAnchor(seqpos, refpos, BioAlignments.OP_START)]
-    for (op, len) in zip(cigar_rle(record)...)
-        if BioAlignments.ismatchop(op)
-            seqpos += len
-            refpos += len
-        elseif BioAlignments.isinsertop(op)
-            seqpos += len
-        elseif BioAlignments.isdeleteop(op)
-            refpos += len
-        else
-            error("operation $(op) is not supported")
-        end
-        push!(anchors, BioAlignments.AlignmentAnchor(seqpos, refpos, op))
-    end
-    return BioAlignments.Alignment(anchors)
+
+    return BioAlignments.Alignment(BioAlignments.AlignmentAnchor[])
 end
 
 function hasalignment(record::Record)
