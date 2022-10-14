@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1]
+
 ### Changed
 
-- Upgraded to BioAlignments v3 ([#53](https://github.com/BioJulia/XAM.jl/pull/53))
+- Upgraded to BioAlignments v3 ([#55](https://github.com/BioJulia/XAM.jl/pull/55))
 
-## [0.3.0]
+## [0.3.0] - 2022-10-10
 
 ## Added
 
@@ -27,5 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `BAM.Record` layout now matches the BAM specs ([#26](https://github.com/BioJulia/XAM.jl/pull/26))
 
-[Unreleased]: https://github.com/BioJulia/XAM.jl/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/BioJulia/XAM.jl/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/BioJulia/XAM.jl/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/BioJulia/XAM.jl/compare/v0.2.8...v0.3.0
