@@ -95,7 +95,7 @@
         @test SAM.refname(record) == "CHROMOSOME_I"
         @test SAM.position(record) == leftposition(record) == 2
         @test SAM.rightposition(record) == rightposition(record) == 102
-        @test SAM.tempname(record) == seqname(record) == "SRR065390.14978392"
+        @test SAM.tempname(record) == "SRR065390.14978392"
         @test SAM.sequence(record) == sequence(record) == dna"CCTAGCCCTAACCCTAACCCTAACCCTAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAA"
         @test SAM.sequence(String, record)          ==    "CCTAGCCCTAACCCTAACCCTAACCCTAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAA"
         @test SAM.seqlength(record) == 100
