@@ -1,30 +1,33 @@
 # BAM Overlap
 # ===========
 
-struct OverlapIterator{T}
-    reader::Reader{T}
+struct OverlapIterator
+    reader::Reader{BAI}
     refname::String
     interval::UnitRange{Int}
 end
 
-function Base.IteratorSize(::Type{OverlapIterator{T}}) where T
+function Base.IteratorSize(::Type{OverlapIterator})
     return Base.SizeUnknown()
 end
 
-function Base.eltype(::Type{OverlapIterator{T}}) where T
+function Base.eltype(::Type{OverlapIterator})
     return Record
+end
+
+function GenomicFeatures.eachoverlap(reader::Reader{BAI}, refname::AbstractString, interval::UnitRange)
+    return OverlapIterator(reader, String(refname), interval)
 end
 
 function GenomicFeatures.eachoverlap(reader::Reader, interval::Interval)
     return GenomicFeatures.eachoverlap(reader, GenomicFeatures.seqname(interval), GenomicFeatures.leftposition(interval):GenomicFeatures.rightposition(interval))
 end
 
-function GenomicFeatures.eachoverlap(reader::Reader, interval)
-    return GenomicFeatures.eachoverlap(reader, convert(Interval, interval))
-end
-
-function GenomicFeatures.eachoverlap(reader::Reader, refname::AbstractString, interval::UnitRange)
-    return OverlapIterator(reader, String(refname), interval)
+function GenomicFeatures.eachoverlap(reader::Reader, refname::AbstractString)
+    refname = String(refname)
+    refindex = findfirst(isequal(refname), reader.refseqnames)
+    refseqlen = reader.refseqlens[refindex]
+    return GenomicFeatures.eachoverlap(reader, refname, 1:refseqlen)
 end
 
 
@@ -50,9 +53,6 @@ function Base.iterate(iter::OverlapIterator)
     if refindex === nothing
         throw(ArgumentError("sequence name $(iter.refname) is not found in the header"))
     end
-
-    @assert iter.reader.index !== nothing "Reader index cannot be nothing."
-
     chunks = Indexes.overlapchunks(iter.reader.index.index, refindex, iter.interval)
     if isempty(chunks)
         return nothing

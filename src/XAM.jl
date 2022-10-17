@@ -1,5 +1,8 @@
 module XAM
 
+using GenomicFeatures
+using BioGenerics
+
 export
     SAM,
     BAM
@@ -30,5 +33,9 @@ include("bam/bam.jl")
 
 using .SAM
 using .BAM
+
+function GenomicFeatures.eachoverlap(reader::BioGenerics.IO.AbstractReader, interval) #TODO: move to GenomicFeatures.
+    return GenomicFeatures.eachoverlap(reader, convert(Interval, interval))
+end
 
 end # module

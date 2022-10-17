@@ -44,7 +44,7 @@
         reader = open(BAM.Reader, joinpath(bamdir, "ce#1.bam"))
         @test isa(reader, BAM.Reader)
         @test eltype(reader) === BAM.Record
-        @test startswith(repr(reader), "XAM.BAM.Reader{IOStream}:")
+        @test startswith(repr(reader), "XAM.BAM.Reader{Nothing}:")
 
         # header
         h = header(reader)
@@ -167,18 +167,18 @@
         end
         for (a, b) in zip(xs, ys)
             if !(
-		        a.block_size    == b.block_size &&
-		        a.refid         == b.refid &&
-		        a.pos           == b.pos &&
-		        a.l_read_name   == b.l_read_name &&
-		        a.mapq          == b.mapq &&
-		        a.bin           == b.bin &&
-		        a.n_cigar_op    == b.n_cigar_op &&
-		        a.flag          == b.flag &&
-		        a.l_seq         == b.l_seq &&
-		        a.next_refid    == b.next_refid &&
-		        a.next_pos      == b.next_pos &&
-		        a.tlen          == b.tlen &&
+                a.block_size    == b.block_size &&
+                a.refid         == b.refid &&
+                a.pos           == b.pos &&
+                a.l_read_name   == b.l_read_name &&
+                a.mapq          == b.mapq &&
+                a.bin           == b.bin &&
+                a.n_cigar_op    == b.n_cigar_op &&
+                a.flag          == b.flag &&
+                a.l_seq         == b.l_seq &&
+                a.next_refid    == b.next_refid &&
+                a.next_pos      == b.next_pos &&
+                a.tlen          == b.tlen &&
                 a.data[1:BAM.data_size(a)] == b.data[1:BAM.data_size(b)])
                 return false
             end
@@ -247,13 +247,12 @@
 
         index = BAM.BAI(filepath * ".bai")
         reader = open(BAM.Reader, filepath, index=index)
-        
+
         @test isa(eachoverlap(reader, "chr1", 1:100), BAM.OverlapIterator)
 
         close(reader)
 
-        @test_throws ErrorException open(BAM.Reader, filepath, index=1234) 
-
+        @test_throws ErrorException open(BAM.Reader, filepath, index=1234)
     end
 
     @testset "Random access" begin

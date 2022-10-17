@@ -4,6 +4,7 @@
 module SAM
 
 using BioGenerics
+using GenomicFeatures
 
 import BioAlignments
 import BioGenerics: BioGenerics, isfilled, header
@@ -55,5 +56,6 @@ include("header.jl")
 include("reader.jl")
 include("readrecord.jl")
 include("writer.jl")
+include("overlap.jl")
 
 end

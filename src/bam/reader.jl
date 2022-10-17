@@ -8,18 +8,18 @@ Create a data reader of the BAM file format.
 
 # Arguments
 * `input`: data source
-* `index=nothing`: filepath to a random access index (currently *bai* is supported) or BAI object 
+* `index=nothing`: filepath to a random access index (currently *bai* is supported) or BAI object
 """
-mutable struct Reader{T} <: BioGenerics.IO.AbstractReader
-    stream::BGZFStreams.BGZFStream{T}
+mutable struct Reader{I<:Union{Nothing, BAI}} <: BioGenerics.IO.AbstractReader
+    stream::BGZFStreams.BGZFStream
     header::SAM.Header
     start_offset::BGZFStreams.VirtualOffset
     refseqnames::Vector{String}
     refseqlens::Vector{Int}
-    index::Union{Nothing, BAI}
+    index::I
 end
 
-function Base.eltype(::Type{Reader{T}}) where T
+function Base.eltype(::Type{R}) where {R<:Reader}
     return Record
 end
 
@@ -28,8 +28,7 @@ function BioGenerics.IO.stream(reader::Reader)
 end
 
 function Reader(input::IO; index=nothing)
-    reader = init_bam_reader(input)
-    reader.index = init_bam_index(index)
+    reader = init_bam_reader(input, index)
     return reader
 end
 
@@ -75,7 +74,7 @@ function Base.iterate(reader::Reader, nextone = Record())
 end
 
 # Initialize a BAM reader by reading the header section.
-function init_bam_reader(input::BGZFStreams.BGZFStream)
+function init_bam_reader(input::BGZFStreams.BGZFStream, index = nothing)
     # magic bytes
     B = read(input, UInt8)
     A = read(input, UInt8)
@@ -113,18 +112,19 @@ function init_bam_reader(input::BGZFStreams.BGZFStream)
         voffset,
         refseqnames,
         refseqlens,
-        nothing)
+        init_bam_index(index)
+    )
 end
 
-function init_bam_reader(input::IO)
-    return init_bam_reader(BGZFStreams.BGZFStream(input))
+function init_bam_reader(input::IO, index = nothing)
+    return init_bam_reader(BGZFStreams.BGZFStream(input), index)
 end
 
 init_bam_index(index::AbstractString) = BAI(index)
 init_bam_index(index::BAI) = index
 init_bam_index(index::Nothing) = nothing
 init_bam_index(index) = error("unrecognizable index argument")
-    
+
 function _read!(reader::Reader, record)
     unsafe_read(
         reader.stream,
