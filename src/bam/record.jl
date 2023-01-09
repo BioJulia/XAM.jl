@@ -138,37 +138,6 @@ function hasflag(record::Record)
 end
 
 """
-    ismapped(record::Record)::Bool
-
-Test if `record` is mapped.
-"""
-function ismapped(record::Record)::Bool
-    return flag(record) & SAM.FLAG_UNMAP == 0
-end
-
-"""
-    isprimary(record::Record)::Bool
-
-Test if `record` is a primary line of the read.
-
-This is equivalent to `flag(record) & 0x900 == 0`.
-"""
-function isprimary(record::Record)::Bool
-    return flag(record) & 0x900 == 0
-end
-
-"""
-    ispositivestrand(record::Record)::Bool
-
-Test if `record` is aligned to the positive strand.
-
-This is equivalent to `flag(record) & 0x10 == 0`.
-"""
-function ispositivestrand(record::Record)::Bool
-    flag(record) & 0x10 == 0
-end
-
-"""
     refid(record::Record)::Int
 
 Get the reference sequence ID of `record`.
@@ -251,15 +220,6 @@ end
 
 function hasrightposition(record::Record)
     return isfilled(record) && ismapped(record)
-end
-
-"""
-    isnextmapped(record::Record)::Bool
-
-Test if the mate/next read of `record` is mapped.
-"""
-function isnextmapped(record::Record)::Bool
-    return isfilled(record) && (flag(record) & SAM.FLAG_MUNMAP == 0)
 end
 
 """

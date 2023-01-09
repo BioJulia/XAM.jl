@@ -11,7 +11,8 @@ import BioGenerics.Exceptions: missingerror
 import BioGenerics.Automa: State
 import BioSequences
 import TranscodingStreams: TranscodingStreams, TranscodingStream
-import ..XAM: flag, XAMRecord, XAMReader, XAMWriter
+import ..XAM: flag, XAMRecord, XAMReader, XAMWriter,
+    ismapped, isprimary, ispositivestrand, isnextmapped #TODO: Deprecate import of flag queries. These were imported to preseve existing API.
 
 using Printf: @sprintf
 
@@ -48,7 +49,6 @@ function unsafe_parse_decimal(::Type{T}, data::Vector{UInt8}, range::UnitRange{I
 end
 
 
-include("flags.jl")
 include("metainfo.jl")
 include("record.jl")
 include("header.jl")
