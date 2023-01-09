@@ -6,7 +6,7 @@ module BAM
 using BioGenerics
 using GenomicFeatures
 using XAM.SAM
-import ..XAM: flag
+import ..XAM: flag, XAMReader, XAMWriter
 
 import BGZFStreams
 import BioAlignments

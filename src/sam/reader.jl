@@ -1,7 +1,7 @@
 # SAM Reader
 # =========
 
-mutable struct Reader{S <: TranscodingStream} <: BioGenerics.IO.AbstractReader
+mutable struct Reader{S <: TranscodingStream} <: XAMReader
     state::State{S}
     header::Header
 end

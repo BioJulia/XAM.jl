@@ -10,7 +10,7 @@ Create a data writer of the BAM file format.
 * `output`: data sink
 * `header`: SAM header object
 """
-mutable struct Writer <: BioGenerics.IO.AbstractWriter
+mutable struct Writer <: XAMWriter
     stream::BGZFStreams.BGZFStream
 end
 

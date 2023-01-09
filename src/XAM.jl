@@ -1,8 +1,13 @@
 module XAM
 
+using BioGenerics
+
 export
     SAM,
     BAM
+
+abstract type XAMReader <: BioGenerics.IO.AbstractReader end
+abstract type XAMWriter <: BioGenerics.IO.AbstractWriter end
 
 """
     flag(record::Union{SAM.Record, BAM.Record})::UInt16
