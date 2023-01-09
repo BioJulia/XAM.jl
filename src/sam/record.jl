@@ -1,7 +1,7 @@
 # SAM Record
 # ==========
 
-mutable struct Record
+mutable struct Record <: XAMRecord
     # Data and filled range.
     data::Vector{UInt8}
     filled::UnitRange{Int} # Note: Specifies the data in use.

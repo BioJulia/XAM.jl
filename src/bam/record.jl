@@ -6,7 +6,7 @@
 
 Create an unfilled BAM record.
 """
-mutable struct Record
+mutable struct Record <: XAMRecord
     # fixed-length fields (see BMA specs for the details)
     block_size::Int32
     refid::Int32

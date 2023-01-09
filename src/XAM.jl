@@ -5,7 +5,8 @@ using BioGenerics
 export
     SAM,
     BAM
-
+    
+abstract type XAMRecord end
 abstract type XAMReader <: BioGenerics.IO.AbstractReader end
 abstract type XAMWriter <: BioGenerics.IO.AbstractWriter end
 
