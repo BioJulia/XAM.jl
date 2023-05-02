@@ -209,6 +209,14 @@
                 close(reader)
                 close(writer)
 
+
+                # Check that EOF_BLOCK gets written.
+                nbytes = filesize(path)
+                @test BAM.BGZFStreams.EOF_BLOCK == open(path) do io
+                    seek(io, nbytes - length(BAM.BGZFStreams.EOF_BLOCK))
+                    read(io)
+                end
+
                 reader = open(BAM.Reader, path)
 
                 @test header(reader) == header_original
@@ -247,12 +255,12 @@
 
         index = BAM.BAI(filepath * ".bai")
         reader = open(BAM.Reader, filepath, index=index)
-        
+
         @test isa(eachoverlap(reader, "chr1", 1:100), BAM.OverlapIterator)
 
         close(reader)
 
-        @test_throws ErrorException open(BAM.Reader, filepath, index=1234) 
+        @test_throws ErrorException open(BAM.Reader, filepath, index=1234)
 
     end
 
