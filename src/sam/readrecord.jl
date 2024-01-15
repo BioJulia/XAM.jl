@@ -1,149 +1,79 @@
 # Automa.jl generated readrecord! and readmetainfo! functions
 # ========================================
 
-import Automa
-import Automa.RegExp: @re_str
-import Automa.Stream: @mark, @markpos, @relpos, @abspos
+import Automa: @re_str, rep, onexit!, onenter!, CodeGenContext, generate_reader, compile
 
 # file   = header . body
 # header = metainfo*
 # body   = record*
-const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_body, sam_machine = (function ()
-
-    isinteractive() && @info "compiling SAM"
-
-    cat = Automa.RegExp.cat
-    rep = Automa.RegExp.rep
-    alt = Automa.RegExp.alt
-    opt = Automa.RegExp.opt
-    any = Automa.RegExp.any
-
+const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_body, sam_machine = let
     metainfo = let
-        tag = re"[A-Z][A-Z]" \ cat("CO")
-        tag.actions[:enter] = [:pos1]
-        tag.actions[:exit]  = [:metainfo_tag]
+        tag = onexit!(onenter!(re"[A-Z][A-Z]" \ re"CO", :pos1), :metainfo_tag)
 
         dict = let
-            key = re"[A-Za-z][A-Za-z0-9]"
-            key.actions[:enter] = [:pos2]
-            key.actions[:exit]  = [:metainfo_dict_key]
-            val = re"[ -~]+"
-            val.actions[:enter] = [:pos2]
-            val.actions[:exit]  = [:metainfo_dict_val]
-            keyval = cat(key, ':', val)
-
-            cat(keyval, rep(cat('\t', keyval)))
+            key = onexit!(onenter!(re"[A-Za-z][A-Za-z0-9]", :pos2), :metainfo_dict_key)
+            val = onexit!(onenter!(re"[ -~]+", :pos2), :metainfo_dict_val)
+            keyval = key * ':' * val
+            keyval * rep('\t' * keyval)
         end
-        dict.actions[:enter] = [:pos1]
-        dict.actions[:exit]  = [:metainfo_val]
+        onexit!(onenter!(dict, :pos1), :metainfo_val)
 
-        co = cat("CO")
-        co.actions[:enter] = [:pos1]
-        co.actions[:exit]  = [:metainfo_tag]
+        co = onexit!(onenter!(re"CO", :pos1), :metainfo_tag)
 
-        comment = re"[^\r\n]*" # Note: Only single line comments are allowed.
-        comment.actions[:enter] = [:pos1]
-        comment.actions[:exit]  = [:metainfo_val]
+        comment = onexit!(onenter!(re"[^\r\n]*", :pos1), :metainfo_val) # Note: Only single line comments are allowed.
 
-        cat('@', alt(cat(tag, '\t', dict), cat(co, '\t', comment)))
+        '@' * ((tag * '\t' * dict) | (co * '\t' * comment))
     end
-    metainfo.actions[:enter] = [:mark]
-    metainfo.actions[:exit]  = [:metainfo]
+    onexit!(onenter!(metainfo, :mark), :metainfo)
 
     record = let
-        qname = re"[!-?A-~]+"
-        qname.actions[:enter] = [:pos]
-        qname.actions[:exit]  = [:record_qname]
-
-        flag = re"[0-9]+"
-        flag.actions[:enter] = [:pos]
-        flag.actions[:exit]  = [:record_flag]
-
-        rname = re"\*|[!-()+-<>-~][!-~]*"
-        rname.actions[:enter] = [:pos]
-        rname.actions[:exit]  = [:record_rname]
-
-        pos = re"[0-9]+"
-        pos.actions[:enter] = [:pos]
-        pos.actions[:exit]  = [:record_pos]
-
-        mapq = re"[0-9]+"
-        mapq.actions[:enter] = [:pos]
-        mapq.actions[:exit]  = [:record_mapq]
-
-        cigar = re"\*|([0-9]+[MIDNSHPX=])+"
-        cigar.actions[:enter] = [:pos]
-        cigar.actions[:exit]  = [:record_cigar]
-
-        rnext = re"\*|=|[!-()+-<>-~][!-~]*"
-        rnext.actions[:enter] = [:pos]
-        rnext.actions[:exit]  = [:record_rnext]
-
-        pnext = re"[0-9]+"
-        pnext.actions[:enter] = [:pos]
-        pnext.actions[:exit]  = [:record_pnext]
-
-        tlen = re"[-+]?[0-9]+"
-        tlen.actions[:enter] = [:pos]
-        tlen.actions[:exit]  = [:record_tlen]
-
-        seq = re"\*|[A-Za-z=.]+"
-        seq.actions[:enter] = [:pos]
-        seq.actions[:exit]  = [:record_seq]
-
-        qual = re"[!-~]+"
-        qual.actions[:enter] = [:pos]
-        qual.actions[:exit]  = [:record_qual]
+        qname = onexit!(onenter!(re"[!-?A-~]+", :pos), :record_qname)
+        flag = onexit!(onenter!(re"[0-9]+", :pos), :record_flag)
+        rname = onexit!(onenter!(re"\*|[!-()+-<>-~][!-~]*", :pos), :record_rname)
+        pos = onexit!(onenter!(re"[0-9]+", :pos), :record_pos)
+        mapq = onexit!(onenter!(re"[0-9]+", :pos), :record_mapq)
+        cigar = onexit!(onenter!(re"\*|([0-9]+[MIDNSHPX=])+", :pos), :record_cigar)
+        rnext = onexit!(onenter!(re"\*|=|[!-()+-<>-~][!-~]*", :pos), :record_rnext)
+        pnext = onexit!(onenter!(re"[0-9]+", :pos), :record_pnext)
+        tlen = onexit!(onenter!(re"[-+]?[0-9]+", :pos), :record_tlen)
+        seq = onexit!(onenter!(re"\*|[A-Za-z=.]+", :pos), :record_seq)
+        qual = onexit!(onenter!(re"[!-~]+", :pos), :record_qual)
 
         field = let
             tag = re"[A-Za-z][A-Za-z0-9]"
-            val = alt(
-                re"A:[!-~]",
-                re"i:[-+]?[0-9]+",
-                re"f:[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?",
-                re"Z:[ !-~]*",
-                re"H:([0-9A-F][0-9A-F])*",
-                re"B:[cCsSiIf](,[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)+")
-
-            cat(tag, ':', val)
+            val = (
+                re"A:[!-~]" |
+                re"i:[-+]?[0-9]+" |
+                re"f:[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?" |
+                re"Z:[ !-~]*" |
+                re"H:([0-9A-F][0-9A-F])*" |
+                re"B:[cCsSiIf](,[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)+"
+            )
+            tag * ':' * val
         end
-        field.actions[:enter] = [:pos]
-        field.actions[:exit]  = [:record_field]
+        onexit!(onenter!(field, :pos), :record_field)
 
-        cat(
-            qname, '\t',
-            flag,  '\t',
-            rname, '\t',
-            pos,   '\t',
-            mapq,  '\t',
-            cigar, '\t',
-            rnext, '\t',
-            pnext, '\t',
-            tlen,  '\t',
-            seq,   '\t',
-            qual,
-            rep(cat('\t', field)))
+        qname * '\t' *
+        flag  * '\t' *
+        rname * '\t' *
+        pos   * '\t' *
+        mapq  * '\t' *
+        cigar * '\t' *
+        rnext * '\t' *
+        pnext * '\t' *
+        tlen  * '\t' *
+        seq   * '\t' *
+        qual *
+        rep('\t' * field)
     end
-    record.actions[:enter] = [:mark]
-    record.actions[:exit]  = [:record]
+    onexit!(onenter!(record, :mark), :record)
+    newline = "\r?" * onenter!(re"\n", :countline)
+    header = onexit!(rep(metainfo * newline), :header)
+    body = onexit!(rep(record * newline), :body)
+    sam = header * body
 
-    newline = let
-        lf = re"\n"
-        lf.actions[:enter] = [:countline]
-
-        cat(re"\r?", lf)
-    end
-
-    header = rep(cat(metainfo, newline))
-    header.actions[:exit] = [:header]
-
-    body = rep(cat(record, newline))
-    body.actions[:exit]  = [:body]
-
-    sam = cat(header, body)
-
-    return map(Automa.compile, (metainfo, record, header, body, sam))
-end)()
+    map(compile, (metainfo, record, header, body, sam))
+end
 
 # write("sam_machine_metainfo.dot", Automa.machine2dot(sam_machine_metainfo))
 # run(`dot -Tsvg -o sam_machine_metainfo.svg sam_machine_metainfo.dot`)
@@ -229,11 +159,7 @@ const sam_actions_body = merge(
     )
 )
 
-const sam_context = Automa.CodeGenContext(
-    generator = :goto,
-    checkbounds = false,
-    loopunroll = 0
-)
+const sam_context = CodeGenContext(generator = :goto)
 
 const sam_initcode_metainfo = quote
     pos1 = 0
@@ -256,7 +182,7 @@ const sam_initcode_body = quote
     cs, linenum = state
 end
 
-Automa.Stream.generate_reader(
+generate_reader(
     :index!,
     sam_machine_metainfo,
     arguments = (:(metainfo::MetaInfo),),
@@ -269,14 +195,23 @@ const sam_returncode_header = quote
     return cs, linenum
 end
 
-Automa.Stream.generate_reader(
+generate_reader(
     :readheader!,
     sam_machine_header,
     arguments = (:(header::SAM.Header), :(state::Tuple{Int,Int})),
     actions = sam_actions_header,
     context = sam_context,
     initcode = sam_initcode_header,
-    returncode = sam_returncode_header
+    returncode = sam_returncode_header,
+    errorcode = quote
+        # We expect the SAM header machine to error, as it finds the first non-header byte.
+        # This happens at state 1 (hence error state -1), and before reaching EOF.
+        if cs == -1 && !(is_eof && p < p_end)
+            @goto __return__
+        else
+            error("Expected input byte after SAM header.")
+        end
+    end
 ) |> eval
 
 const sam_loopcode_body = quote
@@ -285,7 +220,7 @@ const sam_loopcode_body = quote
     end
 end
 
-Automa.Stream.generate_reader(
+generate_reader(
     :index!,
     sam_machine_record,
     arguments = (:(record::Record),),
@@ -299,7 +234,7 @@ const sam_returncode_body = quote
     return cs, linenum, found_record
 end
 
-Automa.Stream.generate_reader(
+generate_reader(
     :readrecord!,
     sam_machine_body,
     arguments = (:(record::Record), :(state::Tuple{Int,Int})),
