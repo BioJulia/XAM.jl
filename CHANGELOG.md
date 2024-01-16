@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0]
+
 ### Added
 - Added BAM.Reader index support for BAI object ([#56](https://github.com/BioJulia/XAM.jl/pull/56)).
 - Added doi badge.
@@ -45,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `BAM.Record` layout now matches the BAM specs ([#26](https://github.com/BioJulia/XAM.jl/pull/26)).
 
-[Unreleased]: https://github.com/BioJulia/XAM.jl/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/BioJulia/XAM.jl/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/BioJulia/XAM.jl/compare/v0.3.1...0.4.0
 [0.3.1]: https://github.com/BioJulia/XAM.jl/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/BioJulia/XAM.jl/compare/v0.2.8...v0.3.0
