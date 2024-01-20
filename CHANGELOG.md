@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved Slack link.
 - Updated to use [Automa](https://github.com/BioJulia/Automa.jl) v1 ([#65](https://github.com/BioJulia/XAM.jl/pull/65)).
 - Pointed the Unit Tests badge at the develop branch.
+- Pluralised flag.
 
 ### Fixed
 - Updated hts-files.md ([#62](https://github.com/BioJulia/XAM.jl/pull/62)).

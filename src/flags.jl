@@ -3,7 +3,7 @@
 #
 
 """
-    flag(record::XAMRecord})::UInt16
+    flags(record::XAMRecord})::UInt16
 
 Get the bitwise flags of `record`.
 The returned value is a `UInt16` of each flag being OR'd together.
@@ -23,9 +23,9 @@ The possible flags are:
     0x0800 supplementary alignment
 """
 
-function flag end
+function flags end
 
-# Bitwise flags (or FLAG).
+# Bitwise flag (or FLAG).
 for (name, bits, doc) in [
         (:PAIRED,        UInt16(0x001), "the read is paired in sequencing, no matter whether it is mapped in a pair"),
         (:PROPER_PAIR,   UInt16(0x002), "the read is mapped in a proper pair"                                       ),
@@ -42,9 +42,9 @@ for (name, bits, doc) in [
     @assert bits isa UInt16 "The bits must be of type UInt16."
     sym = Symbol("FLAG_", name)
     docstring = """    $sym
-    SAM/BAM flag: $doc
+    SAM/BAM flags: $doc
 
-    See also: [`flag`](@ref)
+    See also: [`flags`](@ref)
     """
     @eval begin
         @doc $(docstring) const $(sym) = $(bits)
@@ -57,7 +57,7 @@ end
 Query whether the `record`'s template has multiple segments in sequencing.
 """
 function ispaired(record::XAMRecord)::Bool
-    return flag(record) & FLAG_PAIRED == FLAG_PAIRED
+    return flags(record) & FLAG_PAIRED == FLAG_PAIRED
 end
 
 """
@@ -66,7 +66,7 @@ end
 Query whether each segment of the `record`'s template properly aligned according to the aligner.
 """
 function isproperpair(record::XAMRecord)::Bool
-    return flag(record) & PROPER_PAIR == PROPER_PAIR
+    return flags(record) & PROPER_PAIR == PROPER_PAIR
 end
 
 """
@@ -75,7 +75,7 @@ end
 Query whether the `record` is unmapped.
 """
 function isunmapped(record::XAMRecord)::Bool
-    return flag(record) & FLAG_UNMAP == FLAG_UNMAP
+    return flags(record) & FLAG_UNMAP == FLAG_UNMAP
 end
 
 """
@@ -84,8 +84,8 @@ end
 Query whether the `record` is mapped.
 """
 function ismapped(record::XAMRecord)::Bool
-    # return flag(record) & FLAG_UNMAP == 0
-    return isfilled(record) && (flag(record) & FLAG_UNMAP == 0)
+    # return flags(record) & FLAG_UNMAP == 0
+    return isfilled(record) && (flags(record) & FLAG_UNMAP == 0)
 end
 
 """
@@ -94,7 +94,7 @@ end
 Query whether the `record`'s mate is unmapped.
 """
 function ismateunmapped(record::XAMRecord)::Bool
-    return flag(record) & FLAG_MUNMAP == FLAG_MUNMAP
+    return flags(record) & FLAG_MUNMAP == FLAG_MUNMAP
 end
 
 """
@@ -103,7 +103,7 @@ end
 Test if the mate/next read of `record` is mapped.
 """
 function isnextmapped(record::XAMRecord)::Bool
-    return flag(record) & FLAG_MUNMAP == 0
+    return flags(record) & FLAG_MUNMAP == 0
 end
 
 """
@@ -112,7 +112,7 @@ end
 Query whether the `record` is mapped to the reverse strand.
 """
 function isreverse(record::XAMRecord)::Bool
-    return flag(record) & FLAG_REVERSE == FLAG_REVERSE
+    return flags(record) & FLAG_REVERSE == FLAG_REVERSE
 end
 
 """
@@ -121,7 +121,7 @@ end
 Query whether the `record` is mapped to the forward strand.
 """
 function isforward(record::XAMRecord)::Bool
-    return flag(record) & FLAG_REVERSE == 0
+    return flags(record) & FLAG_REVERSE == 0
 end
 
 """
@@ -148,7 +148,7 @@ end
 Query whether the `record`'s mate is mapped to the reverse strand.
 """
 function ismatereverse(record::XAMRecord)::Bool
-    return flag(record) & FLAG_MREVERSE == FLAG_MREVERSE
+    return flags(record) & FLAG_MREVERSE == FLAG_MREVERSE
 end
 
 """
@@ -157,7 +157,7 @@ end
 Query whether the `record` is read1.
 """
 function isread1(record::XAMRecord)::Bool
-    return flag(record) & FLAG_READ1 == FLAG_READ1
+    return flags(record) & FLAG_READ1 == FLAG_READ1
 end
 
 """
@@ -166,7 +166,7 @@ end
 Query whether the `record` is read2.
 """
 function isread2(record::XAMRecord)::Bool
-    return flag(record) & FLAG_READ2 == FLAG_READ2
+    return flags(record) & FLAG_READ2 == FLAG_READ2
 end
 
 """
@@ -175,7 +175,7 @@ end
 Query whether the `record` is a secondary alignment.
 """
 function issecondaryalignment(record::XAMRecord)::Bool
-    return flag(record) & FLAG_SECONDARY == FLAG_SECONDARY
+    return flags(record) & FLAG_SECONDARY == FLAG_SECONDARY
 end
 
 """
@@ -184,7 +184,7 @@ end
 Query whether the `record` is the primary alignment.
 """
 function isprimaryalignment(record::XAMRecord)::Bool
-    return flag(record) & FLAG_SECONDARY == 0
+    return flags(record) & FLAG_SECONDARY == 0
 end
 
 """
@@ -193,7 +193,7 @@ end
 Query whether the `record` did not pass filters, such as platform/vendor quality controls.
 """
 function isqcfail(record::XAMRecord)::Bool
-    return flag(record) & FLAG_QCFAIL == FLAG_QCFAIL
+    return flags(record) & FLAG_QCFAIL == FLAG_QCFAIL
 end
 
 """
@@ -202,7 +202,7 @@ end
 Query whether the `record` is a PCR or optical duplicate.
 """
 function isduplicate(record::XAMRecord)::Bool
-    return flag(record) & FLAG_DUP == FLAG_DUP
+    return flags(record) & FLAG_DUP == FLAG_DUP
 end
 
 """
@@ -211,7 +211,7 @@ end
 Query whether the `record` is a supplementary alignment.
 """
 function issupplementaryalignment(record::XAMRecord)::Bool
-    return flag(record) & FLAG_SUPPLEMENTARY == FLAG_SUPPLEMENTARY
+    return flags(record) & FLAG_SUPPLEMENTARY == FLAG_SUPPLEMENTARY
 end
 
 """
@@ -219,8 +219,8 @@ end
 
 Query whether `record` is a primary line of the read.
 
-This is equivalent to `flag(record) & 0x900 == 0`.
+This is equivalent to `flags(record) & 0x900 == 0`.
 """
 function isprimary(record::XAMRecord)::Bool
-    return flag(record) & 0x900 == 0
+    return flags(record) & 0x900 == 0
 end

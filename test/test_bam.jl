@@ -37,7 +37,7 @@
         record = BAM.Record()
         @test !isfilled(record)
         @test repr(record) == "XAM.BAM.Record: <not filled>"
-        @test_throws ArgumentError BAM.flag(record)
+        @test_throws ArgumentError BAM.flags(record)
     end
 
     @testset "Reader" begin
@@ -76,7 +76,7 @@
         @test BAM.hasquality(record)
         @test eltype(BAM.quality(record)) == UInt8
         @test BAM.quality(record) == [Int(x) - 33 for x in "#############################@B?8B?BA@@DDBCDDCBC@CDCDCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"]
-        @test BAM.flag(record) === UInt16(16)
+        @test BAM.flags(record) === UInt16(16)
         @test BAM.cigar(record) == "27M1D73M"
         @test BAM.alignment(record) == Alignment([
             AlignmentAnchor(  0,   1,   0, OP_START),
@@ -108,7 +108,7 @@
         @test record.mapq == new_record.mapq
         @test record.bin == new_record.bin
         @test record.block_size == new_record.block_size
-        @test record.flag == new_record.flag
+        @test record.flags == new_record.flags
         @test record.n_cigar_op == new_record.n_cigar_op
         @test record.l_seq == new_record.l_seq
         @test record.next_refid == new_record.next_refid
@@ -174,7 +174,7 @@
 		        a.mapq          == b.mapq &&
 		        a.bin           == b.bin &&
 		        a.n_cigar_op    == b.n_cigar_op &&
-		        a.flag          == b.flag &&
+		        a.flags         == b.flags &&
 		        a.l_seq         == b.l_seq &&
 		        a.next_refid    == b.next_refid &&
 		        a.next_pos      == b.next_pos &&

@@ -110,7 +110,7 @@ In the above we can see there were 7 sequences in the reference: 5 chromosomes, 
 The `XAM` package supports the following accessors for `SAM.Record` types.
 
 ```@docs
-XAM.SAM.flag
+XAM.SAM.flags
 XAM.SAM.ismapped
 XAM.SAM.isprimary
 XAM.SAM.refname
@@ -135,7 +135,7 @@ XAM.SAM.auxdata
 The `XAM` package supports the following accessors for `BAM.Record` types.
 
 ```@docs
-XAM.BAM.flag
+XAM.BAM.flags
 XAM.BAM.ismapped
 XAM.BAM.isprimary
 XAM.BAM.refid
