@@ -54,7 +54,7 @@
         @test isfilled(record)
         @test occursin(r"^XAM.SAM.Record:\n", repr(record))
         @test SAM.ismapped(record)
-        @test SAM.isprimary(record)
+        @test SAM.isprimaryalignment(record)
         @test SAM.hastempname(record)
         @test SAM.tempname(record) == "r001"
         @test SAM.hasflags(record)

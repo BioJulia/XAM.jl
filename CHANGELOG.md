@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
 ## [0.4.0]
 
 ### Added
 - Added BAM.Reader index support for BAI object ([#56](https://github.com/BioJulia/XAM.jl/pull/56)).
 - Added doi badge.
 - Added test to ensure EOF_BLOCK gets written.
+- Added `isreversestrand`.
+- Added `isfirstsegment`.
+- Added `islastsegment`.
 
 ### Changed
 
@@ -23,15 +27,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated to use [Automa](https://github.com/BioJulia/Automa.jl) v1 ([#65](https://github.com/BioJulia/XAM.jl/pull/65)).
 - Pointed the Unit Tests badge at the develop branch.
 - Pluralised flag.
+- Renamed `ismateunmapped` to `isnextunmapped`.
+- Renamed `isreverse` to `isreversecomplemented`.
+- Renamed `isforward` to `isforwardstrand`.
+- `ispositivestrand` aliases `isforwardstrand`.
+- `isnegativestrand` aliases `isreversestrand`.
+- Renamed `ismatereverse` to `isnextreversecomplemented`.
+- `isread1` aliases `isfirstsegment`.
+- `isread2` aliases `islastsegment`.
 
 ### Fixed
 - Updated hts-files.md ([#62](https://github.com/BioJulia/XAM.jl/pull/62)).
+- Corrected the behaviour of `isprimaryalignment` with `isprimary`.
+
+### Removed
+- Moved the functionality of `isprimary` into `isprimaryalignment`.
+
 
 ## [0.3.1]
 
 ### Changed
 
 - Upgraded to BioAlignments v3 ([#55](https://github.com/BioJulia/XAM.jl/pull/55)).
+
 
 ## [0.3.0] - 2022-10-10
 

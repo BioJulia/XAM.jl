@@ -112,7 +112,7 @@ The `XAM` package supports the following accessors for `SAM.Record` types.
 ```@docs
 XAM.SAM.flags
 XAM.SAM.ismapped
-XAM.SAM.isprimary
+XAM.SAM.isprimaryalignment
 XAM.SAM.refname
 XAM.SAM.position
 XAM.SAM.rightposition
@@ -137,7 +137,7 @@ The `XAM` package supports the following accessors for `BAM.Record` types.
 ```@docs
 XAM.BAM.flags
 XAM.BAM.ismapped
-XAM.BAM.isprimary
+XAM.BAM.isprimaryalignment
 XAM.BAM.refid
 XAM.BAM.refname
 XAM.BAM.reflen
