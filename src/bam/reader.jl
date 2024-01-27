@@ -8,9 +8,9 @@ Create a data reader of the BAM file format.
 
 # Arguments
 * `input`: data source
-* `index=nothing`: filepath to a random access index (currently *bai* is supported)
+* `index=nothing`: filepath to a random access index (currently *bai* is supported) or BAI object
 """
-mutable struct Reader{T} <: BioGenerics.IO.AbstractReader
+mutable struct Reader{T} <: XAMReader
     stream::BGZFStreams.BGZFStream{T}
     header::SAM.Header
     start_offset::BGZFStreams.VirtualOffset
@@ -28,13 +28,8 @@ function BioGenerics.IO.stream(reader::Reader)
 end
 
 function Reader(input::IO; index=nothing)
-    if isa(index, AbstractString)
-        index = BAI(index)
-    elseif index != nothing
-        error("unrecognizable index argument")
-    end
     reader = init_bam_reader(input)
-    reader.index = index
+    reader.index = init_bam_index(index)
     return reader
 end
 
@@ -124,6 +119,11 @@ end
 function init_bam_reader(input::IO)
     return init_bam_reader(BGZFStreams.BGZFStream(input))
 end
+
+init_bam_index(index::AbstractString) = BAI(index)
+init_bam_index(index::BAI) = index
+init_bam_index(index::Nothing) = nothing
+init_bam_index(index) = error("unrecognizable index argument")
 
 function _read!(reader::Reader, record)
     unsafe_read(

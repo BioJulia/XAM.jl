@@ -67,7 +67,7 @@ end
 ## SAM and BAM Headers
 
 Both `SAM.Reader` and `BAM.Reader` implement the `header` function, which returns a `SAM.Header` object.
-To extract certain information out of the headers, you can use the `find` method on the header to extract information according to SAM/BAM tag.
+To extract certain information out of the headers, you can use the `findall` method on the header to extract information according to SAM/BAM tag.
 Again we refer you to the [specification](https://samtools.github.io/hts-specs/SAMv1.pdf) for full details of all the different tags that can occur in headers, and what they mean.
 
 Below is an example of extracting all the info about the reference sequences from the BAM header.
@@ -76,7 +76,7 @@ In SAM/BAM, any description of a reference sequence is stored in the header, und
 ```jlcon
 julia> reader = open(SAM.Reader, "data.sam");
 
-julia> find(header(reader), "SQ")
+julia> findall(SAM.header(reader), "SQ")
 7-element Array{Bio.Align.SAM.MetaInfo,1}:
  Bio.Align.SAM.MetaInfo:
     tag: SQ
@@ -110,9 +110,9 @@ In the above we can see there were 7 sequences in the reference: 5 chromosomes, 
 The `XAM` package supports the following accessors for `SAM.Record` types.
 
 ```@docs
-XAM.SAM.flag
+XAM.SAM.flags
 XAM.SAM.ismapped
-XAM.SAM.isprimary
+XAM.SAM.isprimaryalignment
 XAM.SAM.refname
 XAM.SAM.position
 XAM.SAM.rightposition
@@ -135,9 +135,9 @@ XAM.SAM.auxdata
 The `XAM` package supports the following accessors for `BAM.Record` types.
 
 ```@docs
-XAM.BAM.flag
+XAM.BAM.flags
 XAM.BAM.ismapped
-XAM.BAM.isprimary
+XAM.BAM.isprimaryalignment
 XAM.BAM.refid
 XAM.BAM.refname
 XAM.BAM.reflen

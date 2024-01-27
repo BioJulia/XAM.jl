@@ -25,7 +25,7 @@ XAM is tested against Julia `1.X` on Linux, OS X, and Windows.
 
 **Latest build status:**
 
-[![Unit tests](https://github.com/BioJulia/XAM.jl/workflows/Unit%20tests/badge.svg?branch=master)](https://github.com/BioJulia/XAM.jl/actions?query=workflow%3A%22Unit+tests%22+branch%3Amaster)
+[![Unit Tests](https://github.com/BioJulia/XAM.jl/actions/workflows/UnitTests.yml/badge.svg?branch=develop)](https://github.com/BioJulia/XAM.jl/actions/workflows/UnitTests.yml)
 [![Documentation](https://github.com/BioJulia/XAM.jl/workflows/Documentation/badge.svg?branch=master)](https://github.com/BioJulia/XAM.jl/actions?query=workflow%3ADocumentation+branch%3Amaster)
 [![codecov](https://codecov.io/gh/BioJulia/XAM.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/BioJulia/XAM.jl)
 
@@ -64,4 +64,4 @@ Your logo will show up here with a link to your website.
 
 
 ## Questions?
-If you have a question about contributing or using BioJulia software, come on over and chat to us on [the Julia Slack workspace](https://julialang.org/slack/), or you can try the [Bio category of the Julia discourse site](https://discourse.julialang.org/c/domain/bio).
+If you have a question about contributing or using BioJulia software, come on over and chat to us on [the Julia Slack workspace](https://julialang.slack.com/channels/biology), or you can try the [Bio category of the Julia discourse site](https://discourse.julialang.org/c/domain/bio).

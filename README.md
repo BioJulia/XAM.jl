@@ -2,6 +2,7 @@
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Latest Release](https://img.shields.io/github/release/BioJulia/XAM.jl.svg)](https://github.com/BioJulia/XAM.jl/releases/latest)
+[![DOI](https://zenodo.org/badge/201858041.svg)](https://zenodo.org/badge/latestdoi/201858041)
 [![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/BioJulia/XAM.jl/blob/master/LICENSE)
 [![Stable documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://biojulia.github.io/XAM.jl/stable)
 [![Latest documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://biojulia.github.io/XAM.jl/dev/)
@@ -26,7 +27,7 @@ XAM is tested against Julia `1.X` on Linux, OS X, and Windows.
 
 **Latest build status:**
 
-[![Unit tests](https://github.com/BioJulia/XAM.jl/workflows/Unit%20tests/badge.svg?branch=master)](https://github.com/BioJulia/XAM.jl/actions?query=workflow%3A%22Unit+tests%22+branch%3Amaster)
+[![Unit Tests](https://github.com/BioJulia/XAM.jl/actions/workflows/UnitTests.yml/badge.svg?branch=develop)](https://github.com/BioJulia/XAM.jl/actions/workflows/UnitTests.yml)
 [![Documentation](https://github.com/BioJulia/XAM.jl/workflows/Documentation/badge.svg?branch=master)](https://github.com/BioJulia/XAM.jl/actions?query=workflow%3ADocumentation+branch%3Amaster)
 [![codecov](https://codecov.io/gh/BioJulia/XAM.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/BioJulia/XAM.jl)
 
@@ -65,4 +66,4 @@ Your logo will show up here with a link to your website.
 
 
 ## Questions?
-If you have a question about contributing or using BioJulia software, come on over and chat to us on [the Julia Slack workspace](https://julialang.org/slack/), or you can try the [Bio category of the Julia discourse site](https://discourse.julialang.org/c/domain/bio).
+If you have a question about contributing or using BioJulia software, come on over and chat to us on [the Julia Slack workspace](https://julialang.slack.com/channels/biology), or you can try the [Bio category of the Julia discourse site](https://discourse.julialang.org/c/domain/bio).

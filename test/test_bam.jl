@@ -37,7 +37,7 @@
         record = BAM.Record()
         @test !isfilled(record)
         @test repr(record) == "XAM.BAM.Record: <not filled>"
-        @test_throws ArgumentError BAM.flag(record)
+        @test_throws ArgumentError BAM.flags(record)
     end
 
     @testset "Reader" begin
@@ -54,8 +54,8 @@
         record = BAM.Record()
         read!(reader, record)
         @test BAM.ismapped(record)
-        @test BAM.isprimary(record)
-        @test ! BAM.ispositivestrand(record)
+        @test BAM.isprimaryalignment(record)
+        @test !BAM.ispositivestrand(record)
         @test BAM.refname(record) == "CHROMOSOME_I"
         @test BAM.refid(record) === 1
         @test BAM.hasnextrefid(record)
@@ -76,7 +76,7 @@
         @test BAM.hasquality(record)
         @test eltype(BAM.quality(record)) == UInt8
         @test BAM.quality(record) == [Int(x) - 33 for x in "#############################@B?8B?BA@@DDBCDDCBC@CDCDCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"]
-        @test BAM.flag(record) === UInt16(16)
+        @test BAM.flags(record) === UInt16(16)
         @test BAM.cigar(record) == "27M1D73M"
         @test BAM.alignment(record) == Alignment([
             AlignmentAnchor(  0,   1,   0, OP_START),
@@ -108,7 +108,7 @@
         @test record.mapq == new_record.mapq
         @test record.bin == new_record.bin
         @test record.block_size == new_record.block_size
-        @test record.flag == new_record.flag
+        @test record.flags == new_record.flags
         @test record.n_cigar_op == new_record.n_cigar_op
         @test record.l_seq == new_record.l_seq
         @test record.next_refid == new_record.next_refid
@@ -174,7 +174,7 @@
 		        a.mapq          == b.mapq &&
 		        a.bin           == b.bin &&
 		        a.n_cigar_op    == b.n_cigar_op &&
-		        a.flag          == b.flag &&
+		        a.flags         == b.flags &&
 		        a.l_seq         == b.l_seq &&
 		        a.next_refid    == b.next_refid &&
 		        a.next_pos      == b.next_pos &&
@@ -209,6 +209,14 @@
                 close(reader)
                 close(writer)
 
+
+                # Check that EOF_BLOCK gets written.
+                nbytes = filesize(path)
+                @test BAM.BGZFStreams.EOF_BLOCK == open(path) do io
+                    seek(io, nbytes - length(BAM.BGZFStreams.EOF_BLOCK))
+                    read(io)
+                end
+
                 reader = open(BAM.Reader, path)
 
                 @test header(reader) == header_original
@@ -238,6 +246,21 @@
         end
 
         close(reader)
+
+    end
+
+    @testset "BAI" begin
+
+        filepath = joinpath(bamdir, "GSE25840_GSM424320_GM06985_gencode_spliced.head.bam")
+
+        index = BAM.BAI(filepath * ".bai")
+        reader = open(BAM.Reader, filepath, index=index)
+
+        @test isa(eachoverlap(reader, "chr1", 1:100), BAM.OverlapIterator)
+
+        close(reader)
+
+        @test_throws ErrorException open(BAM.Reader, filepath, index=1234)
 
     end
 

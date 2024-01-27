@@ -6,7 +6,7 @@
 
 Create an unfilled BAM record.
 """
-mutable struct Record
+mutable struct Record <: XAMRecord
     # fixed-length fields (see BMA specs for the details)
     block_size::Int32
     refid::Int32
@@ -15,7 +15,7 @@ mutable struct Record
     mapq::UInt8
     bin::UInt16
     n_cigar_op::UInt16
-    flag::UInt16
+    flags::UInt16
     l_seq::Int32
     next_refid::Int32
     next_pos::Int32
@@ -56,7 +56,7 @@ function Base.:(==)(a::Record, b::Record)
         a.mapq          == b.mapq &&
         a.bin           == b.bin &&
         a.n_cigar_op    == b.n_cigar_op &&
-        a.flag          == b.flag &&
+        a.flags         == b.flags &&
         a.l_seq         == b.l_seq &&
         a.next_refid    == b.next_refid &&
         a.next_pos      == b.next_pos &&
@@ -83,7 +83,7 @@ function Base.empty!(record::Record)
     record.l_read_name = 0
     record.mapq = 0
     record.bin = 0
-    record.flag = 0
+    record.flags = 0
     record.n_cigar_op = 0
     record.l_seq      = 0
     record.next_refid = 0
@@ -100,7 +100,7 @@ function Base.show(io::IO, record::Record)
     if isfilled(record)
         println(io)
         println(io, "      template name: ", tempname(record))
-        println(io, "               flag: ", flag(record))
+        println(io, "              flags: ", flags(record))
         println(io, "       reference ID: ", refid(record))
         println(io, "           position: ", position(record))
         println(io, "    mapping quality: ", mappingquality(record))
@@ -128,44 +128,13 @@ end
 # Accessor Fuctions
 # -----------------
 
-function flag(record::Record)::UInt16
+function flags(record::Record)::UInt16
     checkfilled(record)
-    return record.flag
+    return record.flags
 end
 
-function hasflag(record::Record)
+function hasflags(record::Record)
     return isfilled(record)
-end
-
-"""
-    ismapped(record::Record)::Bool
-
-Test if `record` is mapped.
-"""
-function ismapped(record::Record)::Bool
-    return flag(record) & SAM.FLAG_UNMAP == 0
-end
-
-"""
-    isprimary(record::Record)::Bool
-
-Test if `record` is a primary line of the read.
-
-This is equivalent to `flag(record) & 0x900 == 0`.
-"""
-function isprimary(record::Record)::Bool
-    return flag(record) & 0x900 == 0
-end
-
-"""
-    ispositivestrand(record::Record)::Bool
-
-Test if `record` is aligned to the positive strand.
-
-This is equivalent to `flag(record) & 0x10 == 0`.
-"""
-function ispositivestrand(record::Record)::Bool
-    flag(record) & 0x10 == 0
 end
 
 """
@@ -251,15 +220,6 @@ end
 
 function hasrightposition(record::Record)
     return isfilled(record) && ismapped(record)
-end
-
-"""
-    isnextmapped(record::Record)::Bool
-
-Test if the mate/next read of `record` is mapped.
-"""
-function isnextmapped(record::Record)::Bool
-    return isfilled(record) && (flag(record) & SAM.FLAG_MUNMAP == 0)
 end
 
 """
