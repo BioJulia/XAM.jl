@@ -11,8 +11,8 @@ import BioGenerics.Exceptions: missingerror
 import BioGenerics.Automa: State
 import BioSequences
 import TranscodingStreams: TranscodingStreams, TranscodingStream
-import ..XAM: flag, XAMRecord, XAMReader, XAMWriter,
-    ismapped, isprimary, ispositivestrand, isnextmapped #TODO: Deprecate import of flag queries. These were imported to preseve existing API.
+import ..XAM: flags, XAMRecord, XAMReader, XAMWriter,
+    ismapped, isprimaryalignment, ispositivestrand, isnextmapped #TODO: Deprecate import of flag queries. These were imported to preseve existing API.
 
 using Printf: @sprintf
 

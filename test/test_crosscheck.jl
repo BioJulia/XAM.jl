@@ -34,7 +34,7 @@
 		:tempname,# QNAME
 		:mappingquality,# MAPQ
 		:cigar, # CIGAR
-		:flag, # FLAG
+		:flags, # FLAG
 		:sequence, # SEQ
 		:nextposition, # PNEXT
 		:templength, # TLEN

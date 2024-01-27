@@ -8,7 +8,7 @@ mutable struct Record <: XAMRecord
 
     # Mandatory fields.
     qname::UnitRange{Int}
-    flag::UnitRange{Int}
+    flags::UnitRange{Int}
     rname::UnitRange{Int}
     pos::UnitRange{Int}
     mapq::UnitRange{Int}
@@ -80,7 +80,7 @@ end
 function Base.:(==)(a::Record, b::Record)
     return a.filled == b.filled &&
         a.qname     == b.qname &&
-        a.flag      == b.flag &&
+        a.flags     == b.flags &&
         a.rname     == b.rname &&
         a.pos       == b.pos &&
         a.mapq      == b.mapq &&
@@ -99,7 +99,7 @@ function Base.show(io::IO, record::Record)
     if isfilled(record)
         println(io)
         println(io, "    template name: ", hastempname(record) ? tempname(record) : "<missing>")
-        println(io, "             flag: ", hasflag(record) ? flag(record) : "<missing>")
+        println(io, "            flags: ", hasflags(record) ? flags(record) : "<missing>")
         println(io, "        reference: ", hasrefname(record) ? refname(record) : "<missing>")
         println(io, "         position: ", hasposition(record) ? position(record) : "<missing>")
         println(io, "  mapping quality: ", hasmappingquality(record) ? mappingquality(record) : "<missing>")
@@ -133,7 +133,7 @@ function Base.copy(record::Record)
         copy(record.data),
         record.filled,
         record.qname,
-        record.flag,
+        record.flags,
         record.rname,
         record.pos,
         record.mapq,
@@ -150,12 +150,12 @@ end
 # Accessor Functions
 # ------------------
 
-function flag(record::Record)::UInt16
+function flags(record::Record)::UInt16
     checkfilled(record)
-    return unsafe_parse_decimal(UInt16, record.data, record.flag)
+    return unsafe_parse_decimal(UInt16, record.data, record.flags)
 end
 
-function hasflag(record::Record)
+function hasflags(record::Record)
     return isfilled(record)
 end
 
@@ -545,7 +545,7 @@ end
 function Base.empty!(record::Record)
     record.filled = 1:0
     record.qname = 1:0
-    record.flag = 1:0
+    record.flags = 1:0
     record.rname = 1:0
     record.pos = 1:0
     record.mapq = 1:0

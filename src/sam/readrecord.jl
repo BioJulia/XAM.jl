@@ -28,7 +28,7 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
 
     record = let
         qname = onexit!(onenter!(re"[!-?A-~]+", :pos), :record_qname)
-        flag = onexit!(onenter!(re"[0-9]+", :pos), :record_flag)
+        flags = onexit!(onenter!(re"[0-9]+", :pos), :record_flags)
         rname = onexit!(onenter!(re"\*|[!-()+-<>-~][!-~]*", :pos), :record_rname)
         pos = onexit!(onenter!(re"[0-9]+", :pos), :record_pos)
         mapq = onexit!(onenter!(re"[0-9]+", :pos), :record_mapq)
@@ -54,7 +54,7 @@ const sam_machine_metainfo, sam_machine_record, sam_machine_header, sam_machine_
         onexit!(onenter!(field, :pos), :record_field)
 
         qname * '\t' *
-        flag  * '\t' *
+        flags * '\t' *
         rname * '\t' *
         pos   * '\t' *
         mapq  * '\t' *
@@ -129,7 +129,7 @@ const sam_actions_record = Dict(
     :mark => :(@mark),
     :pos => :(pos = @relpos(p)),
     :record_qname => :(record.qname = pos:@relpos(p-1)),
-    :record_flag  => :(record.flag  = pos:@relpos(p-1)),
+    :record_flags  => :(record.flags  = pos:@relpos(p-1)),
     :record_rname => :(record.rname = pos:@relpos(p-1)),
     :record_pos   => :(record.pos   = pos:@relpos(p-1)),
     :record_mapq  => :(record.mapq  = pos:@relpos(p-1)),

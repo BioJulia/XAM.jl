@@ -48,17 +48,17 @@
         @test !isfilled(record)
         @test !SAM.ismapped(record)
         @test repr(record) == "XAM.SAM.Record: <not filled>"
-        @test_throws ArgumentError SAM.flag(record)
+        @test_throws ArgumentError SAM.flags(record)
 
         record = SAM.Record("r001\t99\tchr1\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*")
         @test isfilled(record)
         @test occursin(r"^XAM.SAM.Record:\n", repr(record))
         @test SAM.ismapped(record)
-        @test SAM.isprimary(record)
+        @test SAM.isprimaryalignment(record)
         @test SAM.hastempname(record)
         @test SAM.tempname(record) == "r001"
-        @test SAM.hasflag(record)
-        @test SAM.flag(record) === UInt16(99)
+        @test SAM.hasflags(record)
+        @test SAM.flags(record) === UInt16(99)
         @test SAM.hasrefname(record)
         @test SAM.refname(record) == "chr1"
         @test SAM.hasposition(record)
@@ -101,7 +101,7 @@
         @test SAM.seqlength(record) == 100
         @test SAM.quality(record)         == (b"#############################@B?8B?BA@@DDBCDDCBC@CDCDCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC" .- 33)
         @test SAM.quality(String, record) ==   "#############################@B?8B?BA@@DDBCDDCBC@CDCDCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
-        @test SAM.flag(record) == 16
+        @test SAM.flags(record) == 16
         @test SAM.cigar(record) == "27M1D73M"
         @test SAM.alignment(record) == Alignment([
             AlignmentAnchor(  0,   1,   0, OP_START),
