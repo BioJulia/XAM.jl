@@ -24,5 +24,6 @@ include("reader.jl")
 include("record.jl")
 include("writer.jl")
 include("overlap.jl")
+include("auxdata_new.jl")
 
 end
