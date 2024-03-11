@@ -130,10 +130,8 @@ function _read!(reader::Reader, record)
         reader.stream,
         pointer_from_objref(record),
         FIXED_FIELDS_BYTES)
-    dsize = data_size(record)
-    if length(record.data) < dsize
-        resize!(record.data, dsize)
-    end
+    dsize = record.block_size - FIXED_FIELDS_BYTES + sizeof(record.block_size)
+    resize!(record.data, dsize)
     unsafe_read(reader.stream, pointer(record.data), dsize)
     record.reader = reader
     return record
