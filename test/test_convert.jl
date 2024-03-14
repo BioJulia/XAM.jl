@@ -14,7 +14,7 @@ using Test, XAM
 
     function test_record(record, bam_record)
         @test SAM.position(record) == BAM.position(bam_record)
-        @test SAM.flag(record) == BAM.flag(bam_record)
+        @test SAM.flags(record) == BAM.flags(bam_record)
         @test SAM.cigar(record) == BAM.cigar(bam_record)
         @test SAM.sequence(record) == BAM.sequence(bam_record)
         if SAM.hasquality(record)
