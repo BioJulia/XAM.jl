@@ -5,7 +5,7 @@ using ..BAM
 
 using BioSequences, BioAlignments
 
-global  const op_to_code = Dict(
+const OP_TO_CODE = Dict(
     'M' => 0x00,
     'I' => 0x01,
     'D' => 0x02,
@@ -29,7 +29,7 @@ function parse_cigar(record::SAM.Record)
 
     for (i,c) in enumerate(cigar)
         if c ∈ cigar_ops
-            L = parse(Int, cigar[start:i-1])
+            L = parse(Int, view(cigar, start:i-1))
             op = c
             push!(out, (L = L, op = op))
             start = i+1
@@ -100,7 +100,7 @@ end
 While all single (i.e., non-array) integer types are stored in SAM as 'i', in BAM any of 'cCsSiI' 
 may be used together with the correspondingly-sized binary integer value, chosen according to the field value's magnitude
 """
-global const type_to_aux_int_fields = Dict(
+const TYPE_TO_AUX_INT_FIELDS = Dict(
     Int8 => UInt8('c'),
     UInt8 => UInt8('C'),
     Int16 => UInt8('s'),
@@ -115,7 +115,7 @@ function find_smallest_int_type(x)
     isnothing(idx) && error("Coulnd't find Int type for value $(x)")
     T = candidates[idx]
 
-    T, type_to_aux_int_fields[T]
+    T, TYPE_TO_AUX_INT_FIELDS[T]
 end
 
 function encode_aux_field(record::SAM.Record, field::UnitRange{Int64})
@@ -129,17 +129,15 @@ function encode_aux_field(record::SAM.Record, field::UnitRange{Int64})
         val = reinterpret(UInt8, [T(val)])
 
         return vcat(key, typ, val)
-    end
-    if typ == UInt8('Z')
+    elseif typ == UInt8('Z')
         val = record.data[first(field)+5:last(field)]
         return vcat(key, typ, val, 0x00)
-    end
-    if typ == UInt8('A')
+    elseif typ == UInt8('A')
         val = record.data[first(field)+5:last(field)]
         return vcat(key, typ, val)
+    else
+        error("Unsupported tag type $(Char(typ))")
     end
-
-    error("Unsupported tag type $(Char(typ))")
 end
 
 function encode_cigar(record::SAM.Record)
@@ -148,7 +146,7 @@ function encode_cigar(record::SAM.Record)
     cigar = Vector{UInt8}(undef, length(ops)*4)
     k = 1
     for c in ops
-        cigar_32 = [UInt32(0) + op_to_code[c.op] + (UInt32(c.L) << 4)]
+        cigar_32 = [UInt32(0) + OPT_TO_CODE[c.op] + (UInt32(c.L) << 4)]
         for u in reinterpret(UInt8, cigar_32)
             cigar[k] = u
             k+=1
@@ -161,7 +159,7 @@ function encode_sequence(record::SAM.Record)
     !SAM.hassequence(record) && return UInt8[]
 
     Nsam = SAM.seqlength(record)
-    Nbam = iseven(Nsam) ? div(Nsam,2) : div(Nsam+1,2)
+    Nbam = cld(Nsam, 2)
 
     # Specs : "When l seq is odd the bottom 4 bits of the last byte are undefined, but we recommend writing these as zero."
     bamseq = fill(0x00, Nbam)
