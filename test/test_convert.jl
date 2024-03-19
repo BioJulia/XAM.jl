@@ -89,7 +89,7 @@ using Test, XAM
                 continue
             end
             #@info SAM.tempname(sam_record)
-            bam_record2 = convert(BAM.Record, sam_record; header=h)
+            bam_record2 = BAM.Record(sam_record; header=h)
             @test bam_record == bam_record2
         end
 
