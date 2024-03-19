@@ -30,14 +30,14 @@ using Test, XAM
     sam = "seq1\t81\tPhiX\t1051\t60\t70M\t=\t1821\t702\tTCTTGGCTTCCTTGCTGGTCAGATTGGTCGTCTTATTACCATTTCAACTACTCCGGTTATCGCTGGCGAC\t*\tNM:i:0\tMD:Z:70\tMC:Z:70M\tAS:i:70\tXS:i:0"
     record = XAM.SAM.Record(sam)
 
-    bam_record = convert(BAM.Record, record)
+    bam_record = BAM.Record(record)
     test_record(record, bam_record)
     @test BAM.quality(bam_record) == fill(0xff, BAM.seqlength(bam_record))
 
     # good alignment with qualities
     sam = "seq1\t81\tPhiX\t1051\t60\t70M\t=\t1821\t702\tTCTTGGCTTCCTTGCTGGTCAGATTGGTCGTCTTATTACCATTTCAACTACTCCGGTTATCGCTGGCGAC\tADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\tNM:i:0\tMD:Z:70\tMC:Z:70M\tAS:i:70\tXS:i:0"
     record = XAM.SAM.Record(sam)
-    bam_record = convert(BAM.Record, record)
+    bam_record = BAM.Record(record)
     test_record(record, bam_record)    
     @test BAM.quality(bam_record) == BAM.quality(bam_record)
 
@@ -45,7 +45,7 @@ using Test, XAM
     sam = "seq1\t16\tPhiX\t1051\t60\t38M6I32M\t*\t0\t0\tTCTTGGCTTCCTTGCTGGTCAGATTGGTCGTCTTATTACCCCCCCCATTTCAACTACTCCGGTTATCGCTGGCGAC\t*\tNM:i:6\tMD:Z:70\tAS:i:58\tXS:i:0"
     
     record = XAM.SAM.Record(sam)
-    bam_record = convert(BAM.Record, record)
+    bam_record = BAM.Record(record)
     test_record(record, bam_record)
 
     #################
@@ -57,11 +57,11 @@ using Test, XAM
         for record in records
             # record with more than 65535 operations
             if SAM.tempname(record) == "03d98240-9a1d-4a9a-ae95-2fa8e2f1c945_Basecall_1D_template"
-                @test_throws ErrorException convert(BAM.Record, record)
+                @test_throws ErrorException BAM.Record(record)
                 continue
             end
             
-            bam_record = convert(BAM.Record, record)
+            bam_record = BAM.Record(record)
             test_record(record, bam_record)
         end
     end

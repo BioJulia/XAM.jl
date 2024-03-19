@@ -3,7 +3,8 @@ module Conversion
 using ..SAM
 using ..BAM
 
-using BioSequences, BioAlignments
+using BioSequences: DNAAlphabet, DNA, EncodeError
+using BioAlignments
 
 const OP_TO_CODE = Dict(
     'M' => 0x00,
@@ -38,7 +39,7 @@ function parse_cigar(record::SAM.Record)
     out
 end
 
-function Base.convert(::Type{BAM.Record}, record::SAM.Record; header = nothing)
+function BAM.Record(record::SAM.Record; header = nothing)
 
     bam_record = BAM.Record()
     set_fixed_length_fields!(bam_record, record, header)
@@ -146,13 +147,20 @@ function encode_cigar(record::SAM.Record)
     cigar = Vector{UInt8}(undef, length(ops)*4)
     k = 1
     for c in ops
-        cigar_32 = [UInt32(0) + OPT_TO_CODE[c.op] + (UInt32(c.L) << 4)]
+        cigar_32 = [UInt32(0) + OP_TO_CODE[c.op] + (UInt32(c.L) << 4)]
         for u in reinterpret(UInt8, cigar_32)
             cigar[k] = u
             k+=1
         end
     end
     cigar
+end
+
+@inline function encode_nucleotide(nt::DNA)
+    if !isvalid(nt)
+        throw(EncodeError(DNAAlphabet{4}(), nt))
+    end
+    return reinterpret(UInt8, nt)
 end
 
 function encode_sequence(record::SAM.Record)
@@ -175,12 +183,12 @@ function encode_sequence(record::SAM.Record)
 
     for i in 1:Nbam
         k = 2i -1
-        val = BioSequences.encode(DNAAlphabet{4}(), samseq[k]) |> UInt8
+        val = encode_nucleotide(samseq[k])
         bamseq[i] += val <<4
         
         k = 2i
         k > Nsam && break
-        val = BioSequences.encode(DNAAlphabet{4}(), samseq[k]) |> UInt8
+        val = encode_nucleotide(samseq[k])
         bamseq[i] += val
     end
 
