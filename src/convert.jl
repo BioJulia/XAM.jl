@@ -4,7 +4,6 @@ using ..SAM
 using ..BAM
 
 using BioSequences: DNAAlphabet, DNA, EncodeError
-using BioAlignments
 
 const OP_TO_CODE = Dict(
     'M' => 0x00,
@@ -42,14 +41,15 @@ end
 function BAM.Record(record::SAM.Record; header = nothing)
 
     bam_record = BAM.Record()
-    set_fixed_length_fields!(bam_record, record, header)
-    set_variable_length_fields!(bam_record, record)
+    cigar, n_cigar_op = encode_cigar(record)
+
+    set_fixed_length_fields!(bam_record, record, header, n_cigar_op)
+    set_variable_length_fields!(bam_record, record, cigar)
 
     bam_record
 end
 
-function refname_to_refid(refname::String, header)
-    isnothing(header) && return -1
+function refname_to_refid(refname::String, header::SAM.Header)
     refname == "*" && return -1
     
     refs = findall(header, "SQ")
@@ -58,6 +58,9 @@ function refname_to_refid(refname::String, header)
     end
     error("Couldn't find reference $(refname) in header.")
 end
+
+refname_to_refid(refname::String, header::Nothing) = -1
+
 
 """
     This field is set as '*' when the information is unavailable, and set as '=' if RNEXT is identical RNAME
@@ -72,14 +75,8 @@ function get_refname(record::SAM.Record)
     SAM.refname(record)
 end
 
-function set_fixed_length_fields!(bam_record::BAM.Record, record::SAM.Record, header)
+function set_fixed_length_fields!(bam_record::BAM.Record, record::SAM.Record, header, n_cigar_op)
 
-    cigar_ops = ('M','I','D','N','S','H','P','=','X')
-    n_cigar_op = sum(x ∈ cigar_ops for x in SAM.cigar(record); init = 0)
-
-    if n_cigar_op > typemax(UInt16) 
-        error("Cigar contains more than $(typemax(UInt16)) operations. This is currently unsupported. See section 4.2.2 of SAM/BAM specifications.")
-    end
 
     bin = reg2bin(SAM.position(record)-1, SAM.alignlength(record))
     
@@ -144,6 +141,12 @@ end
 function encode_cigar(record::SAM.Record)
 
     ops = parse_cigar(record)
+
+    n_cigar_op = length(ops)
+    if n_cigar_op > typemax(UInt16) 
+        error("Cigar contains more than $(typemax(UInt16)) operations. This is currently unsupported. See section 4.2.2 of SAM/BAM specifications.")
+    end
+
     cigar = Vector{UInt8}(undef, length(ops)*4)
     k = 1
     for c in ops
@@ -153,7 +156,7 @@ function encode_cigar(record::SAM.Record)
             k+=1
         end
     end
-    cigar
+    cigar, n_cigar_op
 end
 
 @inline function encode_nucleotide(nt::DNA)
@@ -181,15 +184,9 @@ function encode_sequence(record::SAM.Record)
     # 1  2  3
     # AT GG T0
 
-    for i in 1:Nbam
-        k = 2i -1
-        val = encode_nucleotide(samseq[k])
-        bamseq[i] += val <<4
-        
-        k = 2i
-        k > Nsam && break
-        val = encode_nucleotide(samseq[k])
-        bamseq[i] += val
+    for (i, sym) in enumerate(samseq)
+        val = encode_nucleotide(sym)
+        bamseq[div(i + 1, 2)] |= val << (4 * isodd(i))
     end
 
     bamseq
@@ -211,11 +208,10 @@ function reg2bin(start::Int, stop::Int)
     return 0
 end
 
-function set_variable_length_fields!(bam_record::BAM.Record, record::SAM.Record)
+function set_variable_length_fields!(bam_record::BAM.Record, record::SAM.Record, cigar)
 
     tempname = encode_tempname(record)
     seq = encode_sequence(record)
-    cigar = encode_cigar(record)
     aux_data = reduce(vcat, encode_aux_field(record, field) for field in record.fields; init = UInt8[])
     # if quality is missing, fill with good quality
     quality = SAM.hasquality(record) ? SAM.quality(record) : fill(0xff, SAM.hassequence(record) ? SAM.seqlength(record) : 0) 
