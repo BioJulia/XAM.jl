@@ -15,6 +15,7 @@ include("flags.jl")
 
 include("sam/sam.jl")
 include("bam/bam.jl")
+include("convert.jl")
 
 using .SAM
 using .BAM
