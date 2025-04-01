@@ -71,7 +71,7 @@ end
 Query whether the segment is in a template where all segments are properly aligned according to the aligner.
 """
 function isproperpair(record::XAMRecord)::Bool
-    return flags(record) & PROPER_PAIR == PROPER_PAIR
+    return flags(record) & FLAG_PROPER_PAIR == FLAG_PROPER_PAIR
 end
 
 """
