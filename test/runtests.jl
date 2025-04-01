@@ -30,6 +30,7 @@ end
     include("test_issues.jl")
     include("test_crosscheck.jl")
     include("test_convert.jl")
+    include("test_flags.jl")
 
     # Include doctests.
     DocMeta.setdocmeta!(XAM, :DocTestSetup, :(using XAM); recursive=true)
