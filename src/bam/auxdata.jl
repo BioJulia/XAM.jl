@@ -163,7 +163,7 @@ function next_tag_position(data::Vector{UInt8}, p::Int)
         eltyp = Char(data[p])
         elsize = eltyp == 'c' || eltyp == 'C'                 ? 1 :
                  eltyp == 's' || eltyp == 'S'                 ? 2 :
-                 eltyp == 'i' || eltye == 'I' || eltyp == 'f' ? 4 :
+                 eltyp == 'i' || eltyp == 'I' || eltyp == 'f' ? 4 :
                  error("invalid type tag: '$(Char(eltyp))'")
         p += 1
         n = unsafe_load(Ptr{Int32}(pointer(data, p)))
