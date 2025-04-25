@@ -20,7 +20,7 @@ mutable struct Record <: XAMRecord
     next_refid::Int32
     next_pos::Int32
     tlen::Int32
-    # variable length data
+    # This vector never has unused bytes at the end
     data::Vector{UInt8}
     reader::Union{Reader, Nothing}
 
@@ -41,7 +41,7 @@ function Base.convert(::Type{Record}, data::Vector{UInt8})
     record = Record()
     dst_pointer = Ptr{UInt8}(pointer_from_objref(record))
     unsafe_copyto!(dst_pointer, pointer(data), FIXED_FIELDS_BYTES)
-    dsize = data_size(record)
+    dsize = record.block_size - FIXED_FIELDS_BYTES + sizeof(record.block_size)
     resize!(record.data, dsize)
     length(data) < dsize + FIXED_FIELDS_BYTES && throw(ArgumentError("data too short"))
     unsafe_copyto!(record.data, 1, data, FIXED_FIELDS_BYTES + 1, dsize)
@@ -61,19 +61,19 @@ function Base.:(==)(a::Record, b::Record)
         a.next_refid    == b.next_refid &&
         a.next_pos      == b.next_pos &&
         a.tlen          == b.tlen &&
-        a.data[1:data_size(a)] == b.data[1:data_size(b)]
+        a.data == b.data
 end
 
 function Base.copy(record::Record)
-    copy = Record()
-    GC.@preserve copy record begin
-    	dst_pointer = Ptr{UInt8}(pointer_from_objref(copy))
+    cp = Record()
+    GC.@preserve cp record begin
+    	dst_pointer = Ptr{UInt8}(pointer_from_objref(cp))
     	src_pointer = Ptr{UInt8}(pointer_from_objref(record))
     	unsafe_copyto!(dst_pointer, src_pointer, FIXED_FIELDS_BYTES)
     end
-    copy.data       = record.data[1:data_size(record)]
-    copy.reader     = record.reader
-    return copy
+    cp.data       = copy(record.data)
+    cp.reader     = record.reader
+    return cp
 end
 
 function Base.empty!(record::Record)
@@ -584,14 +584,7 @@ end
 # ----------------
 
 # Return the size of the `.data` field.
-function data_size(record::Record)
-    if isfilled(record)
-        return record.block_size - FIXED_FIELDS_BYTES + sizeof(record.block_size)
-    end
-
-    return 0
-
-end
+data_size(record::Record) = isfilled(record) ? length(record.data) : 0
 
 function checkfilled(record::Record)
     if !isfilled(record)
