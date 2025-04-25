@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.5.0]
+
+### Added
 - Added conversion capability for SAM to BAM ([#63](https://github.com/BioJulia/XAM.jl/pull/63)).
+- Added flag tests.
 
 ## [0.4.2]
 
@@ -77,7 +82,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `BAM.Record` layout now matches the BAM specs ([#26](https://github.com/BioJulia/XAM.jl/pull/26)).
 
-[Unreleased]: https://github.com/BioJulia/XAM.jl/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/BioJulia/XAM.jl/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/BioJulia/XAM.jl/compare/v0.4.2...0.5.0
+[0.4.2]: https://github.com/BioJulia/XAM.jl/compare/v0.4.1...0.4.2
+[0.4.1]: https://github.com/BioJulia/XAM.jl/compare/v0.4.0...0.4.1
 [0.4.0]: https://github.com/BioJulia/XAM.jl/compare/v0.3.1...0.4.0
 [0.3.1]: https://github.com/BioJulia/XAM.jl/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/BioJulia/XAM.jl/compare/v0.2.8...v0.3.0
