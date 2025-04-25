@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1]
+
+### Fixed
+- Corrected `isproperpair` method ([#78](https://github.com/BioJulia/XAM.jl/pull/78)).
 
 ## [0.4.0]
 
