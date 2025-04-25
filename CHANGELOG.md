@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Added conversion capability for SAM to BAM ([#63](https://github.com/BioJulia/XAM.jl/pull/63)).
 
+## [0.4.2]
+
+### Fixed
+- Corrected `next_tag_position` method ([#79](https://github.com/BioJulia/XAM.jl/pull/79)).
+
 ## [0.4.1]
 
 ### Fixed
