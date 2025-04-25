@@ -4,6 +4,11 @@ on:
   - push
   - pull_request
 
+# needed to allow julia-actions/cache to delete old caches that it has created
+permissions:
+  actions: write
+  contents: read
+  
 jobs:
   test:
     name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }} - ${{ matrix.julia-arch }} - ${{ github.event_name }}
@@ -31,7 +36,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Setup Julia
-        uses: julia-actions/setup-julia@v1
+        uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
       - name: Run Tests
