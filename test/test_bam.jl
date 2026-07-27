@@ -44,7 +44,7 @@
         reader = open(BAM.Reader, joinpath(bamdir, "ce#1.bam"))
         @test isa(reader, BAM.Reader)
         @test eltype(reader) === BAM.Record
-        @test startswith(repr(reader), "XAM.BAM.Reader{IOStream}:")
+        @test startswith(repr(reader), "XAM.BAM.Reader{")
 
         # header
         h = header(reader)
@@ -199,7 +199,7 @@
 
                 header_original = header(reader)
 
-                writer = BAM.Writer(BGZFStream(path, "w"), BAM.header(reader, fillSQ=isempty(findall(header(reader), "SQ"))))
+                writer = BAM.Writer(BGZFWriter(open(path, "w")), BAM.header(reader, fillSQ=isempty(findall(header(reader), "SQ"))))
 
                 records = BAM.Record[]
                 for record in reader
@@ -212,8 +212,50 @@
 
                 # Check that EOF_BLOCK gets written.
                 nbytes = filesize(path)
-                @test BAM.BGZFStreams.EOF_BLOCK == open(path) do io
-                    seek(io, nbytes - length(BAM.BGZFStreams.EOF_BLOCK))
+                @test EOF_BLOCK == open(path) do io
+                    seek(io, nbytes - length(EOF_BLOCK))
+                    read(io)
+                end
+
+                reader = open(BAM.Reader, path)
+
+                @test header(reader) == header_original
+                @test compare_records(collect(reader), records)
+
+                close(reader)
+
+            end
+        end
+    end
+
+    @testset "Round trip, BGZFStreams" begin
+        for specimen in list_valid_specimens("BAM")
+            filepath = joinpath(bamdir, filename(specimen))
+            mktemp() do path, _
+                # copy
+                if hastags(specimen) && in("bai", tags(specimen))
+                    reader = open(BAM.Reader, filepath, index=filepath * ".bai")
+                else
+                    reader = open(BAM.Reader, filepath)
+                end
+
+                header_original = header(reader)
+
+                writer = BAM.Writer(BGZFStreams.BGZFStream(path, "w"), BAM.header(reader, fillSQ=isempty(findall(header(reader), "SQ"))))
+
+                records = BAM.Record[]
+                for record in reader
+                    push!(records, record)
+                    write(writer, record)
+                end
+                close(reader)
+                close(writer)
+
+
+                # Check that EOF_BLOCK gets written.
+                nbytes = filesize(path)
+                @test EOF_BLOCK == open(path) do io
+                    seek(io, nbytes - length(EOF_BLOCK))
                     read(io)
                 end
 
