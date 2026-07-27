@@ -11,9 +11,9 @@ Create a data reader of the BAM file format.
 * `index=nothing`: filepath to a random access index (currently *bai* is supported) or BAI object
 """
 mutable struct Reader{T} <: XAMReader
-    stream::BGZFStreams.BGZFStream{T}
+    stream::BGZFLib.BGZFReader{T}
     header::SAM.Header
-    start_offset::BGZFStreams.VirtualOffset
+    start_offset::BGZFLib.VirtualOffset
     refseqnames::Vector{String}
     refseqlens::Vector{Int}
     index::Union{Nothing, BAI}
@@ -59,12 +59,12 @@ function header(reader::Reader; fillSQ::Bool=false)::SAM.Header
     return header
 end
 
-function Base.seek(reader::Reader, voffset::BGZFStreams.VirtualOffset)
-    seek(reader.stream, voffset)
+function Base.seek(reader::Reader, voffset::BGZFLib.VirtualOffset)
+    BGZFLib.virtual_seek(reader.stream, voffset)
 end
 
 function Base.seekstart(reader::Reader)
-    seek(reader.stream, reader.start_offset)
+    BGZFLib.virtual_seek(reader.stream, reader.start_offset)
 end
 
 function Base.iterate(reader::Reader, nextone = Record())
@@ -75,7 +75,7 @@ function Base.iterate(reader::Reader, nextone = Record())
 end
 
 # Initialize a BAM reader by reading the header section.
-function init_bam_reader(input::BGZFStreams.BGZFStream)
+function init_bam_reader(input::BGZFLib.BGZFReader)
     # magic bytes
     B = read(input, UInt8)
     A = read(input, UInt8)
@@ -87,25 +87,23 @@ function init_bam_reader(input::BGZFStreams.BGZFStream)
     end
 
     # SAM header
-    textlen = read(input, Int32)
+    textlen = load_le(input, Int32)
     samreader = SAM.Reader(IOBuffer(read(input, textlen)))
 
     # reference sequences
-    n_refs = read(input, Int32)
+    n_refs = load_le(input, Int32)
     refseqnames = Vector{String}(undef, n_refs)
     refseqlens = Vector{Int}(undef, n_refs)
     @inbounds for i in 1:n_refs
-        namelen = read(input, Int32)
+        namelen = load_le(input, Int32)
         data = read(input, namelen)
         seqname = unsafe_string(pointer(data))
-        seqlen = read(input, Int32)
+        seqlen = load_le(input, Int32)
         refseqnames[i] = seqname
         refseqlens[i] = seqlen
     end
 
-    voffset = isa(input.io, Base.AbstractPipe) ?
-        BGZFStreams.VirtualOffset(0, 0) :
-        BGZFStreams.virtualoffset(input)
+    voffset = BGZFLib.virtual_position(input)
 
     return Reader(
         input,
@@ -117,7 +115,7 @@ function init_bam_reader(input::BGZFStreams.BGZFStream)
 end
 
 function init_bam_reader(input::IO)
-    return init_bam_reader(BGZFStreams.BGZFStream(input))
+    return init_bam_reader(BGZFLib.BGZFReader(input))
 end
 
 init_bam_index(index::AbstractString) = BAI(index)
@@ -126,15 +124,19 @@ init_bam_index(index::Nothing) = nothing
 init_bam_index(index) = error("unrecognizable index argument")
 
 function _read!(reader::Reader, record)
-    unsafe_read(
+    # BufferIO.unsafe_read returns a byte count (unlike Base.IO which throws EOFError).
+    # Check explicitly so the overlap iterator's virtual_position check stays bounded.
+    n = unsafe_read(
         reader.stream,
         pointer_from_objref(record),
-        FIXED_FIELDS_BYTES)
+        UInt(FIXED_FIELDS_BYTES))
+    n < FIXED_FIELDS_BYTES && throw(EOFError())
     dsize = data_size(record)
     if length(record.data) < dsize
         resize!(record.data, dsize)
     end
-    unsafe_read(reader.stream, pointer(record.data), dsize)
+    n = unsafe_read(reader.stream, pointer(record.data), UInt(dsize))
+    n < dsize && throw(EOFError())
     record.reader = reader
     return record
 end

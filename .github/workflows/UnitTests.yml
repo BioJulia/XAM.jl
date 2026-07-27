@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         julia-version:
-          - '1.6' # LTS
+          - '1.11' # lowest compatible release
           - '1'
         julia-arch: [x64, x86]
         os: [ubuntu-latest, windows-latest, macOS-latest]
