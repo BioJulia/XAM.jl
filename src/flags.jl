@@ -112,18 +112,22 @@ function isnextmapped(record::XAMRecord)::Bool
 end
 
 """
-    isreverse(record::XAMRecord)::Bool
+    isreversecomplemented(record::XAMRecord)::Bool
 
 Query whether the `record.SEQ`uence is reverse complemented.
+
+Aliases: [`isreversestrand`](@ref), [`isnegativestrand`](@ref)
 """
 function isreversecomplemented(record::XAMRecord)::Bool
     return flags(record) & FLAG_REVERSE == FLAG_REVERSE
 end
 
 """
-    isforward(record::XAMRecord)::Bool
+    isforwardstrand(record::XAMRecord)::Bool
 
 Query whether the `record.SEQ`uence is mapped to the forward strand.
+
+Aliases: [`ispositivestrand`](@ref)
 """
 function isforwardstrand(record::XAMRecord)::Bool
     # return flags(record) & FLAG_REVERSE == 0
@@ -134,6 +138,8 @@ end
     ispositivestrand(record::XAMRecord)::Bool
 
 Query whether the `record.SEQ`uence is aligned to the positive strand.
+
+Aliases: [`isforwardstrand`](@ref)
 """
 function ispositivestrand(record::XAMRecord)::Bool
     return isforwardstrand(record)
@@ -143,15 +149,19 @@ end
     isreversestrand(record::XAMRecord)::Bool
 
 Query whether the `record.SEQ`uence is aligned to the reverse strand.
+
+Aliases: [`isreversecomplemented`](@ref), [`isnegativestrand`](@ref)
 """
 function isreversestrand(record::XAMRecord)::Bool
     return isreversecomplemented(record) # Note: this is an interpretation of FLAG_REVERSE.
 end
 
 """
-    ispositivestrand(record::XAMRecord)::Bool
+    isnegativestrand(record::XAMRecord)::Bool
 
 Query whether the `record.SEQ`uence is aligned to the negative strand.
+
+Aliases: [`isreversecomplemented`](@ref), [`isreversestrand`](@ref)
 """
 function isnegativestrand(record::XAMRecord)::Bool
     return isreversestrand(record)
@@ -170,6 +180,8 @@ end
     isfirstsegment(record::XAMRecord)::Bool
 
 Query whether the segemnt is first in the template.
+
+Aliases: [`isread1`](@ref)
 """
 function isfirstsegment(record::XAMRecord)::Bool
     return flags(record) & FLAG_FIRST_SEGMENT == FLAG_FIRST_SEGMENT
@@ -179,6 +191,8 @@ end
     isread1(record::XAMRecord)::Bool
 
 From a paired-end sequencing point of view, query whether the read is read1.
+
+Aliases: [`isfirstsegment`](@ref)
 """
 function isread1(record::XAMRecord)::Bool
     return isfirstsegment(record)
@@ -188,6 +202,8 @@ end
     islastsegment(record::XAMRecord)::Bool
 
 Query whether the segemnt is last in the template.
+
+Aliases: [`isread2`](@ref)
 """
 function islastsegment(record::XAMRecord)::Bool
     return flags(record) & FLAG_LAST_SEGMENT == FLAG_LAST_SEGMENT
@@ -197,6 +213,8 @@ end
     isread2(record::XAMRecord)::Bool
 
 From a paired-end sequencing point of view, query whether the read is read2.
+
+Aliases: [`islastsegment`](@ref)
 """
 function isread2(record::XAMRecord)::Bool
     return islastsegment(record)

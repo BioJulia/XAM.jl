@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Added conversion capability for SAM to BAM ([#63](https://github.com/BioJulia/XAM.jl/pull/63)).
+- Updated the documentation for the functions that query SAM/BAM flags.
 
 ## [0.4.2]
 

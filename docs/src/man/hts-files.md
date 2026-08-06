@@ -110,13 +110,9 @@ In the above we can see there were 7 sequences in the reference: 5 chromosomes, 
 The `XAM` package supports the following accessors for `SAM.Record` types.
 
 ```@docs
-XAM.SAM.flags
-XAM.SAM.ismapped
-XAM.SAM.isprimaryalignment
 XAM.SAM.refname
 XAM.SAM.position
 XAM.SAM.rightposition
-XAM.SAM.isnextmapped
 XAM.SAM.nextrefname
 XAM.SAM.nextposition
 XAM.SAM.mappingquality
@@ -135,15 +131,11 @@ XAM.SAM.auxdata
 The `XAM` package supports the following accessors for `BAM.Record` types.
 
 ```@docs
-XAM.BAM.flags
-XAM.BAM.ismapped
-XAM.BAM.isprimaryalignment
 XAM.BAM.refid
 XAM.BAM.refname
 XAM.BAM.reflen
 XAM.BAM.position
 XAM.BAM.rightposition
-XAM.BAM.isnextmapped
 XAM.BAM.nextrefid
 XAM.BAM.nextrefname
 XAM.BAM.nextposition
@@ -157,6 +149,50 @@ XAM.BAM.sequence
 XAM.BAM.seqlength
 XAM.BAM.quality
 XAM.BAM.auxdata
+```
+
+## SAM and BAM Flags
+SAM and BAM records containt a FLAG field with bitwise flags. The bits are explained in the following table:
+
+| Decimal | Hex   | Description                                                        |
+|---------|-------|--------------------------------------------------------------------|
+| 1       | 0x1   | template having multiple segments in sequencing                    |
+| 2       | 0x2   | each segment properly aligned according to the aligner             |
+| 4       | 0x4   | segment unmapped                                                   |
+| 8       | 0x8   | next segment in the template unmapped                              |
+| 16      | 0x10  | SEQ being reverse complemented                                     |
+| 32      | 0x20  | SEQ of the next segment in the template being reverse complemented |
+| 64      | 0x40  | the first segment in the template                                  |
+| 128     | 0x80  | the last segment in the template                                   |
+| 256     | 0x100 | secondary alignment                                                |
+| 512     | 0x200 | not passing filters, such as platform/vendor quality controls      |
+| 1024    | 0x400 | PCR or optical duplicate                                           |
+| 2048    | 0x800 | supplementary alignment                                            |
+
+The `XAM` package provides the following predicates for both SAM and BAM records to query the tags:
+
+```@docs
+XAM.ispaired
+XAM.isproperpair
+XAM.isunmapped
+XAM.ismapped
+XAM.isnextunmapped
+XAM.isnextmapped
+XAM.isreversecomplemented
+XAM.isforwardstrand
+XAM.ispositivestrand
+XAM.isreversestrand
+XAM.isnegativestrand
+XAM.isnextreversecomplemented
+XAM.isfirstsegment
+XAM.isread1
+XAM.islastsegment
+XAM.isread2
+XAM.issecondaryalignment
+XAM.isqcfail
+XAM.isduplicate
+XAM.issupplementaryalignment
+XAM.isprimaryalignment
 ```
 
 ## Accessing auxiliary data

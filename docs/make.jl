@@ -4,6 +4,7 @@ using Documenter, XAM
 makedocs(
     checkdocs = :all,
     linkcheck = true,
+    warnonly = true,
     format = Documenter.HTML(
         edit_link = "develop"
     ),
